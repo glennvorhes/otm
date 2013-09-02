@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block head %}
+    <script>
+        function setProject(pid){
+            $.ajax({
+                url: $SCRIPT_ROOT + '/setProject',
+                type: 'POST',
+                data: {"pid": pid},
+                success: function (response) {
+                    console.log(response);
+                    if (response.success == true)
+                    {
+                    console.log(response.success);
+                    self.location = 'map';
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(thrownError);
+                }
+            });
+        }
+    </script>
+{% endblock head%}
+{% block content %}
+    <h1>Projects</h1>
+    <form action="" method="post" name="newProject">
+        {{form.hidden_tag()}}
+        <p>
+            Project Name: {{form.projName(size=30)}}
+            {% for error in form.errors.projName %}
+                <span style="color: red;">[{{error}}]</span>
+            {% endfor %}<br>
+            <br/>
+
+            Project Type:
+            <select id="proj_type" name="proj_type">
+                <option value="-1">Pick Type</option>
+                {% for ptype in projectTypes %}
+                    <option value="{{ ptype.tid }}">{{ptype.description}}</option>
+                {% endfor %}
+            </select>
+        <p>
+        <input type="submit" value="Create Project"></p>
+    </form>
+<table id='projects_table'>
+    <tr>
+        <th>Sel</th>
+        <th>Project Name</th>
+
+        <th>Created</th>
+        <th>Modified</th>
+        <th>Type</th>
+    </tr>
+
+{% for tup in user_projects %}
+    <tr>
+        <td><a href="{{'javascript:setProject(' ~ tup.Project.pid ~');'}}">Select</a></td>
+        <td>{{tup.Project.project_name}}</td>
+        <td>{{tup.Project.created}}</td>
+        <td>{{tup.Project.last_modified}}</td>
+        <td>{{tup.Project_Type.description}}</td>
+    </tr>
+{% endfor %}
+
+</table>
+{% endblock content%}

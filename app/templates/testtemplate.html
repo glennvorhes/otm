@@ -1,0 +1,28 @@
+{#base.html defines a standard layout with a sidebar, styling ...#}
+{% extends "base.html" %}
+
+{#Double brackets {{  }} print the contained Python variable#}
+
+{#Add page specific content to the head here, Javascript, CSS references, etc.#}
+{% block head %}
+{#    Can dynamically create javascipt code, set alertMessageFromServer to the Python variable flaskAlert#}
+    <script>var alertMessageFromServer='{{ flaskAlert }}';</script>
+{% endblock head%}
+
+{#Page specific content in the body#}
+{% block content %}
+    <p>Hi {{ theName }}! The current date is {{ theDate }}</p>
+{#    Do some Python in the template, create a list with days of the week#}
+    {% set dayList = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] %}
+    <ol>
+{#    Loop through the days in the week#}
+    {% for day in dayList %}
+{#        If the day doesn't start with a 'T'#}
+        {% if not day.startswith('T') %}
+{#            Add the day to an ordered list#}
+            <li>{{ day }}</li>
+        {% endif %}
+    {% endfor %}
+    </ol>
+    <input type="button" value='Click for alert' onclick="alert(alertMessageFromServer);"/>
+{% endblock content%}
