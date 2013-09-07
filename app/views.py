@@ -27,16 +27,12 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
-@app.route('/testtemplate2')
-def writeStuff():
-    tmpDir = os.path.join(basedir, 'tmp')
-    print tmpDir
-    randFile = tmpDir + r"/file" + str(random.randint(0, 1990)) + ".txt"
-    with open(randFile, 'w') as f:
-        f.write("hat" + str(random.randint(0, 1990)))
-        f.close()
+@app.route('/show')
+def showma():
+    return "show to ma"
 
-    return randFile
+
+
 
 @app.route('/')
 @app.route('/index')
