@@ -27,8 +27,8 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
-@app.route('/write')
-def write():
+@app.route('/testtemplate2')
+def writeStuff():
     tmpDir = os.path.join(basedir, 'tmp')
     print tmpDir
     randFile = tmpDir + r"/file" + str(random.randint(0, 1990)) + ".txt"
