@@ -12,7 +12,10 @@
     <script src="{{ url_for('static', filename='js/jquery-ui-1.10.3.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/templatestyle.css') }}">
-{#    <script type=text/javascript>$SCRIPT_ROOT={{ request.script_root|tojson|safe }};</script>#}
+    <script type=text/javascript>
+        $SCRIPT_ROOT={{ request.script_root|tojson|safe }};
+        console.log('hat');
+    </script>
     {% block head %}{% endblock head%}
 </head>
 <body>
