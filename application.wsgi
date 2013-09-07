@@ -5,7 +5,3 @@ import sys
 sys.path.insert(0, '/home/webserver/OTM')
 
 from app import app as application
-
-if environ['mod_wsgi.process_group'] != '':
-    import signal, os
-    os.kill(os.getpid(), signal.SIGINT)
