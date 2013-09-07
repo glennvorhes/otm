@@ -6,8 +6,12 @@ from geoalchemy2.elements import WKTElement
 from datetime import datetime
 import simplejson
 from sqlalchemy import func
-import sys
-import psycopg2
+# import sys
+# import psycopg2
+import os
+import math
+import random
+from config import basedir
 
 @app.route('/testurl')
 def testurl():
@@ -22,6 +26,17 @@ def testtemplate():
                            theDate=currentDate,
                            theName=userName,
                            flaskAlert=alertString)
+
+@app.route('/write')
+def write():
+    tmpDir = os.path.join(basedir, 'tmp')
+    print tmpDir
+    randFile = tmpDir + r"/file" + str(random.randint(0, 1990)) + ".txt"
+    with open(randFile, 'w') as f:
+        f.write("hat" + str(random.randint(0, 1990)))
+        f.close()
+
+    return randFile
 
 @app.route('/')
 @app.route('/index')
