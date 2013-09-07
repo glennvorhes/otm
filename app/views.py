@@ -15,7 +15,7 @@ from config import basedir
 
 @app.route('/testurl')
 def testurl():
-    return 'At the test url'
+    return 'At the test url, more stuff'
 
 @app.route('/testtemplate')
 def testtemplate():
