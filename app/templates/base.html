@@ -36,33 +36,25 @@
 		</div>
 		<div class="page">
 			<nav class="sidebar">
-{#				<a href="index.html" id="logo"><img src="static/img/layout/logo.png" alt="logo"></a>#}
 				<ul>
-{#					<li class="selected">#}
-{#						<a href="index.html">Home</a>#}
-{#					</li>#}
-{#					<li>#}
-{#						<a href="about.html">About</a>#}
-{#					</li>#}
-{#					<li>#}
-{#						<a href="services.html">Services</a>#}
-{#					</li>#}
-{#					<li>#}
-{#						<a href="portfolio.html">Portfolio</a>#}
-{#					</li>#}
-{#					<li>#}
-{#						<a href="contact.html">Contact</a>#}
-{#					</li>#}
-{#					<li>#}
-{#						<a href="blog.html">Blog</a>#}
-{#					</li>#}
                     <li {% if title=='Home' %}class="selected"{% endif %}>
 						<a href="{{ url_for('index') }}">Home</a>
 					</li>
                     <li {% if title=='Projects' %}class="selected"{% endif %}>
 						<a href="{{ url_for('getProjects') }}">Projects</a>
 					</li>
+                    <li {% if title=='Open Terrain Map - Blog' %}class="selected"{% endif %}>
+						<a href="{{ url_for('blog') }}">Blog</a>
+					</li>
+                    <li {% if title=='Open Terrain Map - About' %}class="selected"{% endif %}>
+						<a href="{{ url_for('about') }}">About</a>
+					</li>
+                    <li {% if title=='Open Terrain Map - Contact' %}class="selected"{% endif %}>
+						<a href="{{ url_for('contact') }}">Contact</a>
+					</li>
 				</ul>
+
+
 {#				<form action="about.html">#}
 {#					<span>Newsletter Signup</span>#}
 {#					<input type="text" onClick="this.value='';" onFocus="this.select()" onBlur="this.value=!this.value?'Enter Valid Email Address':this.value;" value="Enter Valid Email Address">#}
@@ -71,9 +63,9 @@
 {#				<div class="connect">#}
 {#					<a href="http://freewebsitetemplates.com/go/facebook/" id="facebook">facebook</a> <a href="http://freewebsitetemplates.com/go/twitter/" id="twitter">twitter</a> <a href="http://freewebsitetemplates.com/go/googleplus/" id="googleplus">youtube</a>#}
 {#				</div>#}
-{#				<footer>#}
-{#					Copyright 2013#}
-{#				</footer>#}
+				<footer style="margin: 50px;">
+					Copyright &copy2013
+				</footer>
 			</nav>
 			<div class="body">
 				<div>
@@ -82,7 +74,9 @@
 						&nbsp;&nbsp;<a href="{{ url_for('logout') }}">Logout</a></span>
                     {% endif %}
 					<h2>Web Based Infrastructure Design</h2>
-                    {% block content %}{% endblock content%}
+                    <div style="height: 800px;">
+                        {% block content %}{% endblock content%}
+                    </div>
 {#					<img src="static/img/layout/tree.jpg" alt="">#}
 {#					<div>#}
 {#						<h3><span>What We Do</span></h3>#}

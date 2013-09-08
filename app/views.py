@@ -6,12 +6,6 @@ from geoalchemy2.elements import WKTElement
 from datetime import datetime
 import simplejson
 from sqlalchemy import func
-# import sys
-# import psycopg2
-import os
-import math
-import random
-from config import basedir
 
 @app.route('/testurl')
 def testurl():
@@ -27,17 +21,52 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
-@app.route('/show')
-def showma():
-    return "show to ma"
-
-
-
-
 @app.route('/')
 @app.route('/index')
 def index():
     return render_template('index.html', title='Home')
+
+
+@app.route('/projects', methods=['GET', 'POST'])
+@login_required
+def getProjects():
+    projform = forms.ProjectForm()
+    if request.method == "POST" and projform.validate():
+        projTID = int(request.form["proj_type"])
+        if projTID == -1:
+            flash('Select a project type.')
+        else:
+            newprojName = str(projform.projName.data)
+            newproj = models.Project(tid=projTID, project_name=newprojName, usr=g.user)
+            db_session.add(newproj)
+            db_session.commit()
+
+    projects_type_tuple = db_session.query(models.Project,models.Project_Type).\
+        join(models.Project_Type).filter(models.Project.uid == int(g.user.uid))
+    projectTypes = db_session.query(models.Project_Type).all()
+    userProjectList = []
+    for p in projects_type_tuple:
+        userProjectList.append(p.Project.pid)
+    session['userProjectList'] = userProjectList
+    return render_template('projects.html',
+                           title='Projects',
+                           user_projects = projects_type_tuple,
+                           projectTypes=projectTypes,
+                           form=projform)
+
+@app.route('/blog')
+def blog():
+    return render_template('blog.html', title='Open Terrain Map - Blog')
+
+@app.route('/about')
+def about():
+    return render_template('about.html', title='Open Terrain Map - About')
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html', title='Open Terrain Map - Contact')
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
@@ -112,32 +141,6 @@ def getfeatures():
     jsonstring += '\t]\n}'
     return jsonstring
 
-@app.route('/projects', methods=['GET', 'POST'])
-@login_required
-def getProjects():
-    projform = forms.ProjectForm()
-    if request.method == "POST" and projform.validate():
-        projTID = int(request.form["proj_type"])
-        if projTID == -1:
-            flash('Select a project type.')
-        else:
-            newprojName = str(projform.projName.data)
-            newproj = models.Project(tid=projTID, project_name=newprojName, usr=g.user)
-            db_session.add(newproj)
-            db_session.commit()
-
-    projects_type_tuple = db_session.query(models.Project,models.Project_Type).\
-        join(models.Project_Type).filter(models.Project.uid == int(g.user.uid))
-    projectTypes = db_session.query(models.Project_Type).all()
-    userProjectList = []
-    for p in projects_type_tuple:
-        userProjectList.append(p.Project.pid)
-    session['userProjectList'] = userProjectList
-    return render_template('projects.html',
-                           title='Projects',
-                           user_projects = projects_type_tuple,
-                           projectTypes=projectTypes,
-                           form=projform)
 
 @app.route('/setProject', methods=['POST'])
 @login_required
