@@ -268,11 +268,6 @@ def editfeaturegeom():
     db_session.commit()
     return jsonify(fid=featFID)
 
-@app.route('/testedit', methods=['GET', 'POST'])
-@login_required
-def testedit():
-    return render_template('testedit.html')
-
 @app.route('/map/updateextent', methods=['POST'])
 @login_required
 def updateextent():
@@ -291,7 +286,7 @@ def updateextent():
         geomValid = db_session.scalar(func.ST_IsValid(newGeom))
 
         if not geomValid:
-            return jsonify(code=-1, extGSJN = None)
+            return jsonify(code=-1, extGSJN=None)
 
         proj = db_session.query(models.Project).get(session['currentProject']['pid'])
 
@@ -317,6 +312,8 @@ def deletefeature():
     db_session.delete(deleteFeature)
     db_session.commit()
     return jsonify(success=0)
+
+
 #
 # @app.route('/getelevtile')
 # def getElevTile():

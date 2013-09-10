@@ -1,10 +1,20 @@
-import app
-from app import db_session, models
-from geoalchemy2.elements import RasterElement
-from sqlalchemy.orm import joinedload
-from app.models import Dwelling_Point, User, Post, Impedance_LineString, Impedance_Polygon, Feature, Water_Source, Project_Type, Project
-import subprocess, os
-from datetime import datetime
+
+#
+# import socket
+#
+# try:
+#     socket.inet_aton('192.163.0.110')
+#     print 'here'
+# except socket.error:
+#     print 'not here'
+
+# import app
+# from app import db_session, models
+# from geoalchemy2.elements import RasterElement
+# from sqlalchemy.orm import joinedload
+# from app.models import Dwelling_Point, User, Post, Impedance_LineString, Impedance_Polygon, Feature, Water_Source, Project_Type, Project
+# import subprocess, os
+# from datetime import datetime
 # print os.getcwd()
 # os.chdir('/home/glenn/Desktop/dems')
 # print os.getcwd()
@@ -21,19 +31,19 @@ from datetime import datetime
 
 # raster2pgsql -s 4236 -I -C -M *.tif -F -t 100x100 public.demelevation | psql -d webInfo -h localhost -p 5432
 # Add new comment
-doReload = True
-
-if doReload:
-    app.metadata.drop_all()
-    # exit()
-    app.metadata.create_all()
-
-    san = Project_Type(description='Simplified Sanitary Sewerage')
-    aq = Project_Type(description='Gravity Fed Water Supply')
-    db_session.add(san)
-    db_session.add(aq)
-    db_session.commit()
-    exit()
+# doReload = True
+#
+# if doReload:
+#     app.metadata.drop_all()
+#     # exit()
+#     app.metadata.create_all()
+#
+#     san = Project_Type(description='Simplified Sanitary Sewerage')
+#     aq = Project_Type(description='Gravity Fed Water Supply')
+#     db_session.add(san)
+#     db_session.add(aq)
+#     db_session.commit()
+#     exit()
 
 
 
@@ -110,7 +120,7 @@ if doReload:
 #     print 'any'
 
 
-exit()
+# exit()
 
 
 
