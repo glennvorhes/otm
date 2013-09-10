@@ -4,8 +4,6 @@ from sqlalchemy import Column, Integer, String, DateTime, SmallInteger, ForeignK
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry, Raster
 
-ROLE_USER = 0
-
 
 class User(Base):
     __tablename__ = 'user'
@@ -13,8 +11,8 @@ class User(Base):
     nickname = Column(String(64), index=True, unique=True)
     email = Column(String(120), index=True, unique=True)
     role = Column(SmallInteger, default=0)
-    posts = relationship('Post', backref = 'author', lazy = 'dynamic')
-    projects = relationship('Project', backref = 'usr', lazy = 'dynamic')
+    posts = relationship('Post', backref='author', lazy='dynamic')
+    projects = relationship('Project', backref='usr', lazy='dynamic')
 
     def is_authenticated(self):
         return True
@@ -156,7 +154,7 @@ class Project_Type(Base):
 
 class Post(Base):
     __tablename__ = 'post'
-    id = Column(Integer, primary_key = True)
+    id = Column(Integer, primary_key=True)
     body = Column(String(140))
     timestamp = Column(DateTime)
     user_id = Column(Integer, ForeignKey('user.uid'))

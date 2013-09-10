@@ -93,7 +93,7 @@ def after_login(resp):
         nickname = resp.nickname
         if nickname is None or nickname == "":
             nickname = resp.email.split('@')[0]
-        user = models.User(nickname=nickname, email=resp.email, role=models.ROLE_USER)
+        user = models.User(nickname=nickname, email=resp.email, role=0)
         db_session.add(user)
         db_session.commit()
     remember_me = False
