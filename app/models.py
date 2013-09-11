@@ -175,4 +175,3 @@ class DEM_Elevation(Base):
     rid = Column(Integer, primary_key=True)
     rast = Column(Raster)
     filename = Column(String(50))
-
