@@ -21,6 +21,14 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
+@app.route('/template')
+def template():
+    # return render_template('template.html')
+    return render_template('template.html', title='Home')
+
+
+
+
 @app.route('/')
 @app.route('/index')
 def index():

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    {% if title %}
+    <title>Web Based Infrastructure Design - {{title}}</title>
+    {% else %}
+    <title>Web Based Infrastructure Design</title>
+    {% endif %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui-1.10.3.min.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-ui-1.10.3.min.js') }}"></script>
+    <link href="{{ url_for('static', filename='css/tmplstyle.css') }}" rel="stylesheet" type="text/css" />
+    <script type=text/javascript>
+        $SCRIPT_ROOT={{ request.script_root|tojson|safe }};
+        console.log('hat');
+    </script>
+    {% block head %}{% endblock head%}
+</head>
+<body>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+{% for message in messages %}
+    <li>{{ message }} </li>
+{% endfor %}
+</ul>
+<hr>
+{% endif %}
+{% endwith %}
+<div id="main">
+<!-- header -->
+	<div id="header">
+		<div id="buttons">
+			<div><a href="{{ url_for('index') }}" class="but" title="">Home</a></div>
+			<div><a href="{{ url_for('blog') }}" class="but" title="">Blog</a></div>
+			<div><a href="{{ url_for('getProjects') }}" class="but" title="">Projects</a></div>
+			<div><a href="{{ url_for('about') }}" class="but" title="">About</a></div>
+			<div><a href="{{ url_for('contact') }}" class="but" title="">Contact</a></div>
+{#            <div><a href="{{ url_for('logout') }}" class="but" title="">Logout</a></div>#}
+{#            <a></a>#}
+{#                {% if g.user.is_authenticated() %}#}
+{#                    Logged in as: <br/>#}
+{#                    <b>{{g.user.nickname}}</b><br/>#}
+{#					<<a href="{{ url_for('logout') }}">Logout</a>#}
+{#                {% endif %}#}
+{#            </div>#}
+		</div>
+		<div id="logo"><a href="#">ftdlagoon</a>
+			<h2><a href="#">Small Company Slogan Goes Here</a></h2>
+		</div>
+	</div><div class="inner_copy"></div>
+<!-- / header -->
+<!-- content -->
+	<div id="content">
+        <div class="top">
+        {% block content %}{% endblock content%}
+        </div>
+    <div class="bot"></div>
+	</div>
+<!-- / content -->
+<!-- footer -->
+	<div id="footer">
+{#		Copyright 2013. Designed by <a>Free Flash Templates</a><br/>#}
+{#		<a href="#">Privacy Policy</a> | <a href="#">Terms of Use</a>#}
+	</div>
+<!-- / footer -->
+</div>
+</body>
+</html>

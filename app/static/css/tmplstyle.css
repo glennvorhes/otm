@@ -1,0 +1,230 @@
+* {
+    border:0;
+    margin:0;
+}
+
+img {
+    border:0;
+}
+
+a {
+    text-decoration:underline;
+}
+
+#left a {
+    color:#32A5E7;
+}
+
+#right a {
+    color:#32A5E7;
+}
+
+a:hover {
+    text-decoration:none;
+    color:#32A5E7;
+}
+
+body {
+    font:12px Arial, Helvetica, sans-serif;
+    color:#000;background:url(../img/lyout/bg.jpg) top repeat-x ;
+    margin:4px 0px 0px 0px;
+    line-height:20px;
+}
+
+#main {
+    width:1016px;
+    margin-left:0;
+    /*background:url(../img/lyout/main.jpg) left top no-repeat;*/
+    margin:0px auto;
+}
+
+#header {
+    width:1016px;
+    padding:0;
+    height:420px;
+    /*background:url(../img/lyout/big.jpg) left top no-repeat;*/
+}
+
+.inner_copy, .inner_copy a {
+    border:0;
+    float:right;
+    background:#fff;
+    color:#f00;width:50%;
+    line-height:10px;
+    font-size:10px;
+    margin:-220% 0 0 0;
+    overflow:hidden;
+    padding:0;
+}
+
+#logo {
+    font-family:Arial Narrow, Arial, Helvetica, sans-serif;
+    color:#fff;
+    font-size:18px;
+    font-style:italic;
+    padding:15px 0px 0px 135px;
+    background:url(../img/lyout/logo.jpg)
+    left top no-repeat;height:340px;
+}
+
+#logo a {
+    text-decoration:none;
+    text-transform:lowercase;
+    font-style:italic;
+    font-size:18px;
+    color:#fff;
+}
+
+#logo H2 a {
+    font-size:14px;font-family:Arial Narrow, rial, Helvetica, sans-serif;
+    text-transform:none;
+    font-weight:100;
+}
+
+#buttons {
+    width:1006px;
+    background:url(../img/lyout/but.png) left top no-repeat;
+    text-align:center;
+    margin-left:0;
+    padding-left:10px;
+    padding-top:0;
+    height:62px;
+}
+
+#buttons a {
+    font-family:Arial Narrow, Arial, Helvetica, sans-serif;
+    font-size:18px;
+    display:block;
+    float:left;
+    height:40px;
+    text-decoration:none;
+    color:#fff;
+    padding-top:18px;
+    text-align:center;
+    width:199px;
+}
+
+#buttons a:hover {
+    text-decoration:underline;
+    background:url(../img/lyout/but_ov.jpg) 0px 2px repeat-x;
+}
+
+#content {
+    width:1016px;
+    padding:0;
+    background:url(../img/lyout/cont_mid.gif) repeat-y;
+    margin:0px 0px 0px 0px;
+}
+
+#right {
+    width:285px;
+    margin:0;
+    float:right;
+    color:#000;
+}
+
+.right_b {
+    background:url(../img/lyout/fish.png) 10px 17px no-repeat;
+    padding-left:32px;
+    padding-top:15px;
+    width:240px;
+}
+
+.text {
+    padding:10px 0px 0px 5px;
+}
+
+.img {
+    float:left;
+    margin:5px 16px 5px 0px;
+}
+
+#right span {
+    color:#276FC0;
+    font-weight:bold;
+}
+
+#left span {
+    color:#276FC0;
+    font-weight:bold;
+}
+
+.col_b {
+    color:#276FC0;
+}
+
+#right H1 {
+    font-family:Arial Narrow, Arial, Helvetica, sans-serif;
+    font-size:18px;
+    font-weight:100;
+    color:#fff;text-align:center;
+    background:url(../img/lyout/tit_r.jpg) left top no-repeat;
+    height:32px;
+    padding-top:12px;
+}
+
+#left H2 {
+    font-family:Arial Narrow, Arial, Helvetica, sans-serif;
+    font-size:18px;
+    font-weight:100;
+    color:#3890E5;
+    padding-top:12px;
+    padding-left:0;
+    text-align:left;;
+    background:url(../img/lyout/tit.gif) bottom repeat-x;padding:18px 0px 4px 0px;
+}
+
+.read {
+    text-align:right;
+    padding-right:10px;
+    padding-top:5px;
+    font-weight:bold;text-decoration:none;
+}
+
+#left {
+    float:left;
+    width:695px;
+    /*background:url(../img/lyout/bg_left.jpg) left 25px repeat-x;*/
+    margin-left:0;
+    padding:0px 0px 0px 0px;
+}
+
+.tit_bot {
+    background:url(../img/lyout/right_tit_bot.jpg) left top no-repeat;
+    padding:5px 0 0px 0px;
+}
+
+.top {
+    background:url(../img/lyout/cont_top.gif) top no-repeat;
+    width:996px;
+    padding:5px 5px 0 15px;
+}
+
+.bot {
+    background:url(../img/lyout/cont_bot.gif) left bottom no-repeat;
+    width:1016px;
+    height:10px;
+}
+
+#footer {
+    height:53px;
+    width:100%;
+    font-size:12px;
+    color:#002140;
+    text-align:center;
+    clear:both;
+    padding:12px 0 0px 0px;
+    background:url(../img/lyout/but.png) 0 3px no-repeat;
+}
+
+#footer a {
+    color:#002140;
+    font-size:12px;
+    text-decoration:none;
+}
+
+#footer a:hover {
+    color:#002140;
+    font-size:12px;
+    text-decoration:underline;
+}

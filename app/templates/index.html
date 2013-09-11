@@ -1,7 +1,40 @@
-{% extends "base.html" %}
+{% extends "template.html" %}
 {% block content %}
-    <p>
-        The goal of this application is to provide users with a quick method for users to develop
-        preliminary designs and cost estimates for small water supply and sanitation projects.
-    </p>
+
+        <div id="right">
+            <h1>Company News</h1>
+            <div class="tit_bot">
+                <div class="right_b">
+                    <span class="col_b">Maecenas sed lorem neque. Mauris dictum varius orci, sagittis auctor sapien sagittis vitae. </span><br/>
+                    Suspendisse placerat ante non lectus gravida imperdiet. Fusce vitae vulputate tellus. Morbi pulvinar consequat felis ut consequat. Nunc pellentesque imperdiet...
+                </div>
+                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif')}}" alt="" /></a></div>
+                <div class="right_b">
+                    <span class="col_b">Maecenas sed lorem neque. Mauris dictum varius orci, sagittis auctor sapien sagittis vitae. </span><br/>
+                    Suspendisse placerat ante non lectus gravida imperdiet. Fusce vitae vulputate tellus. Morbi pulvinar consequat felis ut consequat. Nunc pellentesque imperdiet...
+                </div>
+                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a></div>
+            </div><br/>
+        </div>
+        <div id="left">
+            <h2>Maecenas sed lorem neque</h2>
+            <div class="text">
+                <img src="{{ url_for('static', filename='img/lyout/img1.jpg') }}" width="202" height="150" class="img" alt="" /><span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas luctus condimentum pharetra. Nunc et augue sed ligula dictum ultricies. </span><br/>
+                In hendrerit blandit nisi ullamcorper pretium. Pellentesque tristique, diam sollicitudin condimentum dignissim, lorem urna cursus mi, quis iaculis est dolor ac purus. Nunc facilisis dictum neque eu sollicitudin. Nulla luctus, erat sed hendrerit facilisis, erat enim viverra nulla, eu blandit nisi lacus vel velit. Vestibulum eros tortor, aliquet ac elementum vel, aliquet eget purus. Morbi nisi leo, tristique vitae iaculis a, vehicula ut nulla. Pellentesque sit amet leo dolor, ac varius mi. Aenean nulla metus, laoreet nec tincidunt quis, ultrices quis leo. Vivamus viverra magna sit amet turpis hendrerit vitae blandit ligula. tempus. Maecenas imperdiet, nisl sed congue eleifend, orci quam. <br/>
+                 <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a></div>
+            </div>
+            <h2>Free Website Templates</h2>
+            <div class="text">
+                <img src="{{ url_for('static', filename='img/lyout/img2.jpg') }}" width="152" height="102" class="img" alt="" /><span>Aliquam sed elit orci, vitae iaculis velit. Donec viverra consectetur suscipit. Maecenas lacinia augue eu magna interdum at tincidunt risus tincidunt. </span><br/>
+                Etiam condimentum, ligula id pretium commodo, eros nunc convallis augue, vel consequat sapien orci id massa. Aliquam porta rutrum ante, sit amet lobortis orci cursus at. Suspendisse sollicitudin velit in magna rutrum suscipit. Nunc malesuada risus et ante pulvinar tincidunt. Sed ac imperdiet elit. Integer bibendum fermentum ligula, quis sollicitudin turpis convallis ac. Duis<br/>
+                purus. Morbi nisi leo, tristique vitae iaculis a, vehicula ut nulla. Pellentesque sit amet leo dolor, ac varius mi. Aenean nulla metus, laoreet nec tincidunt quis, ultrices quis leo. Vivamus viverra magna sit amet turpis hendrerit vitae blandit ligula. tempus. Maecenas imperdiet, nisl sed congue eleifend, orci quam. <br/>
+                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a></div><br/>
+            </div>
+        </div><br/>
+        <div style="clear: both"></div>
+
+{#    <p>#}
+{#        The goal of this application is to provide users with a quick method for users to develop#}
+{#        preliminary designs and cost estimates for small water supply and sanitation projects.#}
+{#    </p>#}
 {% endblock %}
