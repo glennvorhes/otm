@@ -31,25 +31,25 @@
 <div id="main">
 <!-- header -->
 	<div id="header">
+        <div class="loginView">
+            {% if g.user.is_authenticated() %}
+                Logged in as: <br/>
+                <b>{{g.user.nickname}}</b><br/>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% endif %}
+        </div>
 		<div id="buttons">
 			<div><a href="{{ url_for('index') }}" class="but" title="">Home</a></div>
 			<div><a href="{{ url_for('blog') }}" class="but" title="">Blog</a></div>
 			<div><a href="{{ url_for('getProjects') }}" class="but" title="">Projects</a></div>
 			<div><a href="{{ url_for('about') }}" class="but" title="">About</a></div>
 			<div><a href="{{ url_for('contact') }}" class="but" title="">Contact</a></div>
-{#            <div><a href="{{ url_for('logout') }}" class="but" title="">Logout</a></div>#}
-{#            <a></a>#}
-{#                {% if g.user.is_authenticated() %}#}
-{#                    Logged in as: <br/>#}
-{#                    <b>{{g.user.nickname}}</b><br/>#}
-{#					<<a href="{{ url_for('logout') }}">Logout</a>#}
-{#                {% endif %}#}
-{#            </div>#}
 		</div>
 		<div id="logo"><a href="#">ftdlagoon</a>
+
 			<h2><a href="#">Small Company Slogan Goes Here</a></h2>
 		</div>
-	</div><div class="inner_copy"></div>
+	</div>
 <!-- / header -->
 <!-- content -->
 	<div id="content">
