@@ -155,8 +155,9 @@ class Project_Type(Base):
 class Post(Base):
     __tablename__ = 'post'
     id = Column(Integer, primary_key=True)
-    body = Column(String(140))
-    timestamp = Column(DateTime)
+    postTitle = Column(String(75))
+    body = Column(String(5000))
+    timestamp = Column(DateTime, default=datetime.now())
     user_id = Column(Integer, ForeignKey('user.uid'))
 
     def __repr__(self):

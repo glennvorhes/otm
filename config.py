@@ -13,7 +13,7 @@ OPENID_PROVIDERS = [
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 #dialect+driver://username:password@host:port/database
-# SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:turkey@localhost:5432/webInfo'
-SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:turkey@192.168.0.101:5432/webInfo'
+SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:turkey@localhost:5432/webInfo'
+# SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:turkey@192.168.0.101:5432/webInfo'
 repositoryName = "db_repository"
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, repositoryName)

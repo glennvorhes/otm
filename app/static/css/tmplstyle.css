@@ -1,24 +1,3 @@
-* {
-    border:0;
-    margin:0;
-}
-
-img {
-    border:0;
-}
-
-a {
-    text-decoration:underline;
-}
-
-#left a {
-    color:#32A5E7;
-}
-
-#right a {
-    color:#32A5E7;
-}
-
 a:hover {
     text-decoration:none;
     color:#32A5E7;
@@ -26,67 +5,44 @@ a:hover {
 
 body {
     font:12px Arial, Helvetica, sans-serif;
-    /*color:#000;background:url(../img/lyout/bg.jpg) top repeat-x ;*/
-    background: -prefix-linear-gradient(top, blue, white);
-    background: linear-gradient(to bottom, blue, white);
+    background: -webkit-gradient(#32A5E7, #ffffff);
+    background: linear-gradient(to bottom, #32A5E7, white);
     margin:4px 0px 0px 0px;
     line-height:20px;
 }
 
 #main {
     width:1016px;
-    margin-left:0;
     margin:0px auto;
 }
 
-#header {
+.pageBlock {
     width:1016px;
-    padding:0;
-    height:420px;
+    padding:3px;
+    background-color: white;
+    border:black solid thin;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    margin:3px;
+    position: relative;
 }
 
-#header .loginView {
+
+#loginControl {
     position: absolute;
     right: 10px;
-    top: 40px;
+    top: 10px;
     z-index: 999;
     font-size:14px;font-family:Arial Narrow, rial, Helvetica, sans-serif;
-    text-transform:none;
-    font-weight:100;
-}
-
-#logo {
-    font-family:Arial Narrow, Arial, Helvetica, sans-serif;
-    color:#fff;
-    font-size:18px;
-    font-style:italic;
-    padding:15px 0px 0px 135px;
-    background:url(../img/lyout/logo.jpg)
-    left top no-repeat;height:340px;
-}
-
-#logo a {
-    text-decoration:none;
-    text-transform:lowercase;
-    font-style:italic;
-    font-size:18px;
-    color:#fff;
-}
-
-#logo H2 a {
-    font-size:14px;font-family:Arial Narrow, rial, Helvetica, sans-serif;
-    text-transform:none;
-    font-weight:100;
+    height: 40px;
+    width: 150px;
+    text-align: center;
 }
 
 
 #buttons {
-    width:1006px;
-    background:url(../img/lyout/but.png) left top no-repeat;
+    background: #32A5E7;
     text-align:center;
-    margin-left:0;
-    padding-left:10px;
-    padding-top:0;
     height:62px;
 }
 
@@ -99,26 +55,12 @@ body {
     text-decoration:none;
     color:#fff;
     padding-top:18px;
-    text-align:center;
     width:199px;
 }
 
 #buttons a:hover {
     text-decoration:underline;
-    background:url(../img/lyout/but_ov.jpg) 0px 2px repeat-x;
-}
-
-#content {
-    width:1016px;
-    padding:0;
-    background-color: white;
-    border:#000924 solid thin;
-
-
-    -moz-border-radius: 15px;
-    border-radius: 15px;
-    /*background:url(../img/lyout/cont_mid.gif) repeat-y;*/
-    margin:0px 0px 0px 0px;
+    background:green;
 }
 
 #right {
@@ -139,7 +81,7 @@ body {
     padding:10px 0px 0px 5px;
 }
 
-.img {
+.imgFloat {
     float:left;
     margin:5px 16px 5px 0px;
 }
@@ -163,7 +105,6 @@ body {
     font-size:18px;
     font-weight:100;
     color:#fff;text-align:center;
-    background:url(../img/lyout/tit_r.jpg) left top no-repeat;
     height:32px;
     padding-top:12px;
 }
@@ -176,7 +117,6 @@ body {
     padding-top:12px;
     padding-left:0;
     text-align:left;;
-    background:url(../img/lyout/tit.gif) bottom repeat-x;padding:18px 0px 4px 0px;
 }
 
 .read {
@@ -198,37 +138,9 @@ body {
     padding:5px 0 0px 0px;
 }
 
-.top {
-    /*background:url(../img/lyout/cont_top.gif) top no-repeat;*/
-    width:996px;
-    padding:5px 5px 0 15px;
-}
-
-.bot {
-    /*background:url(../img/lyout/cont_bot.gif) left bottom no-repeat;*/
-    width:1016px;
-    height:10px;
-}
-
 #footer {
-    height:53px;
-    width:100%;
-    font-size:12px;
-    color:#002140;
-    text-align:center;
-    clear:both;
-    padding:12px 0 0px 0px;
-    background:url(../img/lyout/but.png) 0 3px no-repeat;
+    height: 50px;
+    background: -webkit-gradient(#32A5E7, #ffffff);
+    background: linear-gradient(to bottom, #32A5E7, white);
 }
 
-#footer a {
-    color:#002140;
-    font-size:12px;
-    text-decoration:none;
-}
-
-#footer a:hover {
-    color:#002140;
-    font-size:12px;
-    text-decoration:underline;
-}

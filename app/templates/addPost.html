@@ -1,0 +1,24 @@
+{% extends "template.html" %}
+{% block content %}
+    <form action="" method="post" name="newPost">
+    {{newPostForm.hidden_tag()}}
+    <h3>New Post Title</h3>
+    {{newPostForm.newPostTitle(size=60)}}<br/>
+    <h3>New Post Content</h3>
+    {{newPostForm.newPostContent(cols="70", rows="20")|safe}}<br/>
+
+{#        {% for error in newPostForm.errors.projName %}#}
+{#            <span style="color: red;">[{{error}}]</span>#}
+{#        {% endfor %}<br>#}
+{#        <br/>#}
+
+{#        Project Type:#}
+{#        <select id="proj_type" name="proj_type">#}
+{#            <option value="-1">Pick Type</option>#}
+{#            {% for ptype in projectTypes %}#}
+{#                <option value="{{ ptype.tid }}">{{ptype.description}}</option>#}
+{#            {% endfor %}#}
+{#        </select>#}
+    <input type="submit" value="Create Post"></p>
+</form>
+{% endblock %}

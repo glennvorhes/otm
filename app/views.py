@@ -5,7 +5,7 @@ import forms
 from geoalchemy2.elements import WKTElement
 from datetime import datetime
 import simplejson
-from sqlalchemy import func
+from sqlalchemy import func, desc
 
 @app.route('/testurl')
 def testurl():
@@ -21,13 +21,23 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
-@app.route('/template')
-def template():
-    # return render_template('template.html')
-    return render_template('template.html', title='Home')
+@app.route('/addpost', methods=['GET', 'POST'])
+@login_required
+def addpost():
+    userID = long(g.user.get_id())
+    if userID != 1:
+        return redirect(url_for('index'))
 
-
-
+    addNewPost = forms.NewPost()
+    if request.method == "POST" and addNewPost.validate():
+        postTitle = str(addNewPost.newPostTitle.data)
+        postContent = str(addNewPost.newPostContent.data)
+        theNewPost = models.Post(postTitle=postTitle, body=postContent, user_id=g.user.get_id())
+        db_session.add(theNewPost)
+        db_session.commit()
+        return redirect(url_for('index'))
+    else:
+        return render_template('addPost.html', newPostForm=addNewPost, title='Add Post')
 
 @app.route('/')
 @app.route('/index')
@@ -49,7 +59,7 @@ def getProjects():
             db_session.add(newproj)
             db_session.commit()
 
-    projects_type_tuple = db_session.query(models.Project,models.Project_Type).\
+    projects_type_tuple = db_session.query(models.Project, models.Project_Type).\
         join(models.Project_Type).filter(models.Project.uid == int(g.user.uid))
     projectTypes = db_session.query(models.Project_Type).all()
     userProjectList = []
@@ -58,7 +68,7 @@ def getProjects():
     session['userProjectList'] = userProjectList
     return render_template('projects.html',
                            title='Projects',
-                           user_projects = projects_type_tuple,
+                           user_projects=projects_type_tuple,
                            projectTypes=projectTypes,
                            form=projform)
 
@@ -95,7 +105,7 @@ def after_login(resp):
     if resp.email is None or resp.email == "":
         flash('Invalid login. Please try again.')
         redirect(url_for('login'))
-    user = db_session.query(models.User).filter_by(email = resp.email).first()
+    user = db_session.query(models.User).filter_by(email=resp.email).first()
 
     if user is None:
         nickname = resp.nickname
