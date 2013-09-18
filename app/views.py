@@ -48,7 +48,7 @@ def index():
 
     VALID_TAGS = ['strong', 'em', 'p', 'ul', 'li', 'br', 'b', 'i', 'code']
 
-    if len(posts) > 2:
+    try:
         post0Title = posts[0].postTitle
         soup0 = BeautifulSoup(str(posts[0].body).replace('\n', '<br/>'))
         for tag in soup0.findAll(True):
@@ -62,7 +62,7 @@ def index():
             if tag.name not in VALID_TAGS:
                 tag.hidden = True
         post1Body = soup1.renderContents()
-    else:
+    except:
         post0Title = 'Title 1'
         post0Body = 'Body 1'
         post1Title = 'Title 2'
