@@ -48,21 +48,29 @@ def index():
 
     VALID_TAGS = ['strong', 'em', 'p', 'ul', 'li', 'br', 'b', 'i', 'code']
 
-    soup0 = BeautifulSoup(str(posts[0].body).replace('\n', '<br/>'))
-    for tag in soup0.findAll(True):
-        if tag.name not in VALID_TAGS:
-            tag.hidden = True
-    post0Body = soup0.renderContents()
+    if len(posts) > 2:
+        post0Title = posts[0].postTitle
+        soup0 = BeautifulSoup(str(posts[0].body).replace('\n', '<br/>'))
+        for tag in soup0.findAll(True):
+            if tag.name not in VALID_TAGS:
+                tag.hidden = True
+        post0Body = soup0.renderContents()
 
-    soup1 = BeautifulSoup(str(posts[1].body).replace('\n', '<br/>'))
-    for tag in soup1.findAll(True):
-        if tag.name not in VALID_TAGS:
-            tag.hidden = True
-    post1Body = soup1.renderContents()
+        post1Title = posts[1].postTitle
+        soup1 = BeautifulSoup(str(posts[1].body).replace('\n', '<br/>'))
+        for tag in soup1.findAll(True):
+            if tag.name not in VALID_TAGS:
+                tag.hidden = True
+        post1Body = soup1.renderContents()
+    else:
+        post0Title = 'Title 1'
+        post0Body = 'Body 1'
+        post1Title = 'Title 2'
+        post1Body = 'Body 2'
 
     return render_template('index.html', title='Home',
-                           post0Title=posts[0].postTitle, post0Body=post0Body,
-                           post1Title=posts[1].postTitle, post1Body=post1Body)
+                           post0Title=post0Title, post0Body=post0Body,
+                           post1Title=post1Title, post1Body=post1Body)
 
 
 @app.route('/projects', methods=['GET', 'POST'])
