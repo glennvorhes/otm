@@ -31,12 +31,15 @@
         <div id="main">
         <!-- header -->
             <div id="header">
+
                 <div class='pageBlock' id="buttons">
-                    <div><a href="{{ url_for('index') }}" class="but" title="">Home</a></div>
-                    <div><a href="{{ url_for('blog') }}" class="but" title="">Blog</a></div>
-                    <div><a href="{{ url_for('getProjects') }}" class="but" title="">Projects</a></div>
-                    <div><a href="{{ url_for('about') }}" class="but" title="">About</a></div>
-                    <div><a href="{{ url_for('contact') }}" class="but" title="">Contact</a></div>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}" class="but" title="">Home</a></li>
+                        <li><a href="{{ url_for('blog') }}" class="but" title="">Blog</a></li>
+                        <li><a href="{{ url_for('getProjects') }}" class="but" title="">Projects</a></li>
+                        <li><a href="{{ url_for('about') }}" class="but" title="">About</a></li>
+                        <li><a href="{{ url_for('contact') }}" class="but" title="">Contact</a></li>
+                    </ul>
                 </div>
                 <div class='pageBlock'>
                     <img src="{{ url_for('static', filename='img/lyout/logo.jpg') }}" alt='logo' />
@@ -58,11 +61,12 @@
             </div>
         <!-- / content -->
         <!-- footer -->
-            <div id="footer" class='pageBlock'>
+{#            <div id="footer" class='pageBlock'>#}
+{#                &copy;<script>var d = new Date(); document.write(d.getFullYear().toString());</script>#}
         {#		Copyright 2013. Designed by <a>Free Flash Templates</a><br/>#}
         {#		<a href="#">Privacy Policy</a> | <a href="#">Terms of Use</a>#}
-            </div>
-        <!-- / footer -->
-        </div>
+{#            </div>#}
+{#        <!-- / footer -->#}
+{#        </div>#}
     </body>
 </html>

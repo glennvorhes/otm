@@ -3,6 +3,13 @@ a:hover {
     color:#32A5E7;
 }
 
+code {
+    background-color: #d3d3d3;
+    color: darkblue;
+    display: block;
+    overflow: auto;
+}
+
 body {
     font:12px Arial, Helvetica, sans-serif;
     background: -webkit-gradient(#32A5E7, #ffffff);
@@ -27,7 +34,6 @@ body {
     position: relative;
 }
 
-
 #loginControl {
     position: absolute;
     right: 10px;
@@ -40,10 +46,21 @@ body {
 }
 
 
+
 #buttons {
     background: #32A5E7;
     text-align:center;
-    height:62px;
+    height:50px;
+}
+
+#buttons ul{
+    list-style-type:none;
+    margin:0;
+    padding:0;
+}
+
+#buttons li {
+    display:inline;
 }
 
 #buttons a {
@@ -51,16 +68,19 @@ body {
     font-size:18px;
     display:block;
     float:left;
-    height:40px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    height:37px;
     text-decoration:none;
     color:#fff;
-    padding-top:18px;
-    width:199px;
+    padding-top:11px;
+    width:201px;
 }
 
 #buttons a:hover {
     text-decoration:underline;
-    background:green;
+    border: #dfdfdf solid thin;
+    background: #3487e7;
 }
 
 #right {
@@ -75,10 +95,13 @@ body {
     padding-left:32px;
     padding-top:15px;
     width:240px;
+    height: 210px;
+    overflow: hidden;
 }
 
 .text {
     padding:10px 0px 0px 5px;
+    text-align: justify;
 }
 
 .imgFloat {
@@ -139,8 +162,11 @@ body {
 }
 
 #footer {
+    text-align: center;
     height: 50px;
     background: -webkit-gradient(#32A5E7, #ffffff);
     background: linear-gradient(to bottom, #32A5E7, white);
 }
+
+
 

@@ -6,6 +6,7 @@ from geoalchemy2.elements import WKTElement
 from datetime import datetime
 import simplejson
 from sqlalchemy import func, desc
+from bs4 import BeautifulSoup
 
 @app.route('/testurl')
 def testurl():
@@ -32,6 +33,7 @@ def addpost():
     if request.method == "POST" and addNewPost.validate():
         postTitle = str(addNewPost.newPostTitle.data)
         postContent = str(addNewPost.newPostContent.data)
+
         theNewPost = models.Post(postTitle=postTitle, body=postContent, user_id=g.user.get_id())
         db_session.add(theNewPost)
         db_session.commit()
@@ -42,7 +44,25 @@ def addpost():
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', title='Home')
+    posts = db_session.query(models.Post).order_by(models.Post.timestamp.desc())
+
+    VALID_TAGS = ['strong', 'em', 'p', 'ul', 'li', 'br', 'b', 'i', 'code']
+
+    soup0 = BeautifulSoup(str(posts[0].body).replace('\n', '<br/>'))
+    for tag in soup0.findAll(True):
+        if tag.name not in VALID_TAGS:
+            tag.hidden = True
+    post0Body = soup0.renderContents()
+
+    soup1 = BeautifulSoup(str(posts[1].body).replace('\n', '<br/>'))
+    for tag in soup1.findAll(True):
+        if tag.name not in VALID_TAGS:
+            tag.hidden = True
+    post1Body = soup1.renderContents()
+
+    return render_template('index.html', title='Home',
+                           post0Title=posts[0].postTitle, post0Body=post0Body,
+                           post1Title=posts[1].postTitle, post1Body=post1Body)
 
 
 @app.route('/projects', methods=['GET', 'POST'])
