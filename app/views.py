@@ -1,12 +1,15 @@
-from flask import render_template, send_file, flash, redirect, session, url_for, request, g, jsonify
+from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, make_response
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db_session, lm, oid, models
 import forms
 from geoalchemy2.elements import WKTElement
 from datetime import datetime
 import simplejson
-from sqlalchemy import func, desc
+from sqlalchemy import func
 from bs4 import BeautifulSoup
+import psycopg2
+from config import ConnStringDEM_DB
+
 
 @app.route('/testurl')
 def testurl():
@@ -21,6 +24,18 @@ def testtemplate():
                            theDate=currentDate,
                            theName=userName,
                            flaskAlert=alertString)
+
+@app.route('/get_image')
+def get_image():
+    conn = psycopg2.connect(ConnStringDEM_DB)
+    cur = conn.cursor()
+    cur.execute('select ST_AsPNG(rast) as img from hisp where rid = 1000')
+    buff = cur.fetchone()[0]
+
+    response = make_response(str(buff))
+    response.headers['Content-Type'] = 'image/png'
+    return response
+
 
 @app.route('/addpost', methods=['GET', 'POST'])
 @login_required
