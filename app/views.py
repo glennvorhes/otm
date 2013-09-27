@@ -29,13 +29,36 @@ def testtemplate():
 def get_image():
     conn = psycopg2.connect(ConnStringDEM_DB)
     cur = conn.cursor()
-    cur.execute('select ST_AsPNG(rast) as img from hisp where rid = 1000')
-    buff = cur.fetchone()[0]
 
-    response = make_response(str(buff))
+    query = '''
+    SELECT ST_AsPNG(ST_Clip(ST_Union(rast),ST_GeomFromText(
+    'POLYGON((
+    -70.867300734267559 19.661829263186096,
+    -70.849416603214721 19.654727312790087,
+    -70.816449470069145 19.645189913381806,
+    -70.816449470069145 19.645189913381806,
+    -70.827869457367939 19.602772064022986,
+    -70.885831279695779 19.623069082738326,
+    -70.867300734267559 19.661829263186096))', 4236),true))
+    FROM hisp
+    WHERE ST_Intersects(rast, ST_GeomFromText(
+    'POLYGON((
+    -70.867300734267559 19.661829263186096,
+    -70.849416603214721 19.654727312790087,
+    -70.816449470069145 19.645189913381806,
+    -70.816449470069145 19.645189913381806,
+    -70.827869457367939 19.602772064022986,
+    -70.885831279695779 19.623069082738326,
+    -70.867300734267559 19.661829263186096))', 4236));
+    '''
+
+    cur.execute(query)
+    buffer = cur.fetchone()[0]
+    conn.close()
+
+    response = make_response(str(buffer))
     response.headers['Content-Type'] = 'image/png'
     return response
-
 
 @app.route('/addpost', methods=['GET', 'POST'])
 @login_required
