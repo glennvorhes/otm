@@ -9,6 +9,7 @@ from sqlalchemy import func
 from bs4 import BeautifulSoup
 import psycopg2
 from config import ConnStringDEM_DB
+import base64
 
 
 @app.route('/testurl')
@@ -25,36 +26,75 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
+@app.route('/testparams')
+def testParams():
+    hasError = False
+
+    srid = request.args.get('srid', '')
+    if srid == '':
+        srid = 4236
+    try:
+        srid = long(srid)
+    except:
+        hasError = True
+
+    geomWKT = request.args.get('geom', '')
+
+    if geomWKT == '':
+        hasError = True
+
+    return 'stuff    {0}   {1}'.format(srid, geomWKT)
+
 @app.route('/get_image')
 def get_image():
+    hasError = False
+
+    inSrid = request.args.get('insrid', '')
+    if inSrid == '':
+        inSrid = 4236
+    try:
+        inSrid = long(inSrid)
+    except:
+        hasError = True
+
+    outSrid = request.args.get('outsrid', '3857')
+    print outSrid
+
+    try:
+        outSrid = long(outSrid)
+    except:
+        hasError = True
+
+    geomWKT = request.args.get('geom', '')
+
+    if geomWKT == '':
+        hasError = True
+
+    if hasError:
+        return 'error'
+
+    getBase64 = request.args.get('base64', '')
+
     conn = psycopg2.connect(ConnStringDEM_DB)
     cur = conn.cursor()
 
-    query = '''
-    SELECT ST_AsPNG(ST_Clip(ST_Union(rast),ST_GeomFromText(
-    'POLYGON((
-    -70.867300734267559 19.661829263186096,
-    -70.849416603214721 19.654727312790087,
-    -70.816449470069145 19.645189913381806,
-    -70.816449470069145 19.645189913381806,
-    -70.827869457367939 19.602772064022986,
-    -70.885831279695779 19.623069082738326,
-    -70.867300734267559 19.661829263186096))', 4236),true))
-    FROM hisp
-    WHERE ST_Intersects(rast, ST_GeomFromText(
-    'POLYGON((
-    -70.867300734267559 19.661829263186096,
-    -70.849416603214721 19.654727312790087,
-    -70.816449470069145 19.645189913381806,
-    -70.816449470069145 19.645189913381806,
-    -70.827869457367939 19.602772064022986,
-    -70.885831279695779 19.623069082738326,
-    -70.867300734267559 19.661829263186096))', 4236));
-    '''
+    query = "SELECT \
+            ST_AsPNG(\
+                ST_Transform(\
+                    ST_Clip(\
+                        ST_Union(rast),ST_Transform(ST_GeomFromText('{0}', {1}), 4236), true),\
+                    {2})\
+                )\
+            FROM hisp \
+            WHERE ST_Intersects(rast, ST_Transform(ST_GeomFromText('{0}', {1}), 4236));".format(geomWKT, inSrid, outSrid)
+    print query
 
     cur.execute(query)
     buffer = cur.fetchone()[0]
     conn.close()
+
+    if getBase64:
+        return base64.b64encode(buffer)
 
     response = make_response(str(buffer))
     response.headers['Content-Type'] = 'image/png'
