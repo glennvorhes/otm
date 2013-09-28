@@ -114,11 +114,11 @@ ExtentLayer.prototype.addFeature = function(feat){
         theFeat.destroy();
         return;
     }
-    if (theFeat.geometry.getArea() > 2 * 32534032){
-        alert('The selected extent is too large.  Please select a smaller area');
-        theFeat.destroy();
-        return;
-    }
+//    if (theFeat.geometry.getArea() > 2 * 32534032){
+//        alert('The selected extent is too large.  Please select a smaller area');
+//        theFeat.destroy();
+//        return;
+//    }
 //    theFeat.destroy();
     var wkt = app.wktParser.write(theFeat);
     var geoJSONObj = JSON.parse(app.geoJsonParser.write(theFeat));
@@ -168,18 +168,19 @@ ExtentLayer.prototype.modifyFeature = function(feat){
         return;
     var featureBackup = new OpenLayers.Feature.Vector(theFeat.modified.geometry, theFeat.attributes);
 
-    if (theFeat.geometry.getArea() > 2 * 32534032){
-        alert('The selected extent is too large.  Please select a smaller area');
-        theFeat.destroy();
-        app.extentLayer.extentLayer.events.unregister(
-            "featureadded", null, app.extentLayer.addFeature);
-        featureBackup.fid = '1000000';
-        app.extentLayer.extentLayer.addFeatures([featureBackup]);
-        console.log(featureBackup.fid);
-        app.extentLayer.extentLayer.events.register(
-            "featureadded", null, app.extentLayer.addFeature);
-        return;
-    }
+
+//    if (theFeat.geometry.getArea() > 1000000 * 1000000){
+//        alert('The selected extent is too large.  Please select a smaller area');
+//        theFeat.destroy();
+//        app.extentLayer.extentLayer.events.unregister(
+//            "featureadded", null, app.extentLayer.addFeature);
+//        featureBackup.fid = '1000000';
+//        app.extentLayer.extentLayer.addFeatures([featureBackup]);
+//        console.log(featureBackup.fid);
+//        app.extentLayer.extentLayer.events.register(
+//            "featureadded", null, app.extentLayer.addFeature);
+//        return;
+//    }
 
     var wkt = app.wktParser.write(theFeat);
     var geoJSONObj = JSON.parse(app.geoJsonParser.write(theFeat));
@@ -280,11 +281,14 @@ ExtentLayer.prototype.updateDEM = function(){
         return;
     }
 
-    var extentWKT = app.wktParser.extractGeometry(this.extentGeom);
     var demBounds = this.extentGeom.getBounds();
+    var geomClone = this.extentGeom.clone();
+
+    geomClone.transform(new OpenLayers.Projection("EPSG:3857"), new OpenLayers.Projection("EPSG:4326"));
+    var extentWKT = app.wktParser.extractGeometry(geomClone);
 
     $.ajax({
-        url: $SCRIPT_ROOT + '/get_image?base64=1&insrid=3857&outsrid=3857&geom=' + extentWKT,
+        url: $SCRIPT_ROOT + '/get_image?base64=1&outsrid=3857&geom=' + extentWKT,
         type: 'GET',
         data: {},
         success: function (response) {

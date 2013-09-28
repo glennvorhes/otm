@@ -49,16 +49,7 @@ def testParams():
 def get_image():
     hasError = False
 
-    inSrid = request.args.get('insrid', '')
-    if inSrid == '':
-        inSrid = 4236
-    try:
-        inSrid = long(inSrid)
-    except:
-        hasError = True
-
-    outSrid = request.args.get('outsrid', '3857')
-    print outSrid
+    outSrid = request.args.get('outsrid', '4236')
 
     try:
         outSrid = long(outSrid)
@@ -79,20 +70,20 @@ def get_image():
     cur = conn.cursor()
 
     query = "SELECT \
-            ST_AsPNG(\
-                ST_Transform(\
-                    ST_Clip(\
-                        ST_Union(rast),ST_Transform(ST_GeomFromText('{0}', {1}), 4236), true),\
-                    {2})\
-                )\
-            FROM hisp \
-            WHERE ST_Intersects(rast, ST_Transform(ST_GeomFromText('{0}', {1}), 4236));".format(geomWKT, inSrid, outSrid)
-    print query
+        ST_AsPNG(\
+            ST_Transform(\
+                ST_Clip(\
+                    ST_Union(rast),ST_GeomFromText('{0}', 4236), true)\
+                ,{1})\
+            )\
+        FROM aster_gdem \
+        WHERE ST_Intersects(rast, ST_GeomFromText('{0}', 4236));".format(geomWKT, outSrid)
 
     cur.execute(query)
     buffer = cur.fetchone()[0]
     conn.close()
 
+    # if getBase64 is true, return the base64 representation of the raster
     if getBase64:
         return base64.b64encode(buffer)
 
