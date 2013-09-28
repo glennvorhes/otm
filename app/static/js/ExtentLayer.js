@@ -298,6 +298,13 @@ ExtentLayer.prototype.updateDEM = function(){
             app.extentLayer.demImage.setOpacity(demOpacity);
             olMap.addLayer(app.extentLayer.demImage);
 
+
+            var setIndex = 0;
+            while (olMap.layers[setIndex].isBaseLayer && setIndex < olMap.layers.length){
+                setIndex++;
+            }
+            map.setLayerIndex(app.extentLayer.demImage, setIndex);
+
             //display the opacity controller
             document.getElementById('demOpacityTitleContainer').style.display = 'inherit';
         },
