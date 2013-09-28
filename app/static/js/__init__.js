@@ -129,7 +129,8 @@ dojo.ready(function () {
         {
             allOverlays: false,
             controls: [
-                        new OpenLayers.Control.Navigation({zoomWheelEnabled: true}),
+                        new OpenLayers.Control.Navigation({zoomWheelEnabled: true,
+                                            dragPanOptions: {enableKinetic: true}}),
                         new OpenLayers.Control.PanZoomBar({}),
                         new OpenLayers.Control.LayerSwitcher({})
                     ],
@@ -152,7 +153,7 @@ dojo.ready(function () {
         )]);
 
     //Add elevation hillshade layer if it exists
-    addDemHillshade(projectProperties.pid, map);
+    //addDemHillshade(projectProperties.pid, map);
 
     //Add the extent layer feature if it exists for the project
     app['extentLayer'] = new ExtentLayer(map, projectProperties, 'set_extent_radio');

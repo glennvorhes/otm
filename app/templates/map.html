@@ -187,7 +187,7 @@
                                     style="width:160px;"
                                     data-dojo-type="dijit/form/HorizontalSlider"
                                     data-dojo-props='value:0, minimum: 0, maximum:100,
-                                    onChange:function(val){ if (!app.demImage) {return;} app.demImage.setOpacity(val / 100); },
+                                    onChange:function(val){ if (!app.extentLayer.demImage) {return;} app.extentLayer.demImage.setOpacity(val / 100); },
                                     showButtons:true,
                                     intermediateChanges:false,
                                     discreteValues: 5,

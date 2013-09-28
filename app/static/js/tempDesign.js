@@ -610,50 +610,6 @@ tempDesign.pipe = {
     ]
 };
 
-function addDemHillshade(projid, olMap){
-    /*Add functionality here to add the DEM to the project
-    This will likely involve checking if a raster has been generated
-    for the project in question
-    In the future this should come along with the project properties
-    For now, pick the raster manually*/
-    var demImgUrl;
-    var demSize;
-
-    switch(projid){
-
-        //It doestn't like big images
-        case 1:
-            //La Sierra
-//            console.log('add image for La Sierra');
-            demImgUrl = imgURL + 'SierraDEM2.png';
-            demSize = new OpenLayers.Size(500, 500);
-            demSize = new OpenLayers.Size(300, 300);
-            break;
-        case 2:
-            //Santiago
-            console.log('add image for Santiago');
-            demImgUrl = imgURL + 'CienDEM.png';
-
-            demSize = new OpenLayers.Size(302, 244);
-            break;
-    }
-
-    if (demImgUrl && projectProperties.geom){
-        var newGeom = app.geoJsonParser.parseGeometry(projectProperties.geom);
-        var demBounds = newGeom.getBounds();
-        app.demImage = new OpenLayers.Layer.Image(
-            'DEM', demImgUrl, demBounds,demSize ,{isBaseLayer:false});
-        app.demImage.setOpacity(0);
-
-        olMap.addLayer(app.demImage);
-
-        //set up the opacity controller
-        document.getElementById('demOpacityTitleContainer').style.display = 'inherit';
-
-    }
-
-}
-
 function generateDesign(){
 //    var designTimeout = 25;
     var designTimeout = 4000;
