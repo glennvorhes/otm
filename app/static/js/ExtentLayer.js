@@ -1,4 +1,6 @@
 function ExtentLayer(olMap, projectConfig, radioButtonTagName) {
+    this.olMap = olMap;
+
     //Define the layer style and layer
     var vector_style = new OpenLayers.Style({
         'fillColor': '#FF00BF',
@@ -28,9 +30,9 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName) {
         'renderers': app.renderer
     });
 
-    var thisExtentLayer = this.extentLayer;
+    olMap.addLayer(this.extentLayer);
 
-    olMap.addLayer(thisExtentLayer);
+
 
     //All Draw controls are initialized, only those relevant to this layer will be loaded
     this.drawControls = {
@@ -45,14 +47,17 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName) {
 
     this.deactivateAll();
 
+    //if extent has been set
     if (projectConfig.geom){
         var newFeat = new OpenLayers.Feature.Vector();
         newFeat.fid = '1000000';
-        var newGeom = app.geoJsonParser.parseGeometry(projectConfig.geom);
-        newFeat.geometry = newGeom;
-        var bounds = newGeom.getBounds();
+        this.extentGeom = app.geoJsonParser.parseGeometry(projectConfig.geom);
+        newFeat.geometry = this.extentGeom;
+        var bounds = this.extentGeom.getBounds();
         map.zoomToExtent(bounds, false);
         this.extentLayer.addFeatures([newFeat]);
+
+        this.updateDEM();
     }
 
     //Add the event listeners after loading
@@ -133,6 +138,8 @@ ExtentLayer.prototype.addFeature = function(feat){
                 theFeat.fid = '1000000';
                 theFeat.attributes['fid'] = '1000000';
                 theFeat.state = null;
+                app.extentLayer.extentGeom = theFeat.geometry;
+                app.extentLayer.updateDEM();
             }
             else {
                 theFeat.destroy();
@@ -188,8 +195,10 @@ ExtentLayer.prototype.modifyFeature = function(feat){
         data: updateExtObj,
         success: function (response) {
             if (response.code == 1) {
-                projectProperties.geom = response.extGSJN;
+                projectProperties.geom = theFeat.geometry;
                 theFeat.state = theFeat.modified = null;
+                app.extentLayer.extentGeom = theFeat.geometry;
+                app.extentLayer.updateDEM();
             }
             else {
                 theFeat.destroy();
@@ -252,5 +261,48 @@ ExtentLayer.prototype.clearExtent = function(){
     });
 
     projectProperties.geom = null;
-
+    app.extentLayer.extentGeom = null;
+    app.extentLayer.updateDEM();
 };
+
+ExtentLayer.prototype.updateDEM = function(){
+    var olMap = this.olMap;
+    //hide the opacity slider
+    document.getElementById('demOpacityTitleContainer').style.display = 'none';
+    if (this.demImage) {
+        olMap.removeLayer(this.demImage);
+        this.demImage.destroy();
+        this.demImage = null;
+    }
+
+    //bail out if geometry hasn't been set
+    if (!this.extentGeom){
+        return;
+    }
+
+    var extentWKT = app.wktParser.extractGeometry(this.extentGeom);
+    var demBounds = this.extentGeom.getBounds();
+
+    $.ajax({
+        url: $SCRIPT_ROOT + '/get_image?base64=1&insrid=3857&outsrid=3857&geom=' + extentWKT,
+        type: 'GET',
+        data: {},
+        success: function (response) {
+            app.extentLayer.demImage = new OpenLayers.Layer.Image(
+                'DEM', 'data:image/png;base64,' + response, demBounds, new OpenLayers.Size(1, 1) ,{isBaseLayer:false});
+            var demOpacity = parseFloat(dijit.byId('demOpacitySlider').value) / 100;
+            app.extentLayer.demImage.setOpacity(demOpacity);
+            olMap.addLayer(app.extentLayer.demImage);
+
+            //display the opacity controller
+            document.getElementById('demOpacityTitleContainer').style.display = 'inherit';
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+
+
+
+}
