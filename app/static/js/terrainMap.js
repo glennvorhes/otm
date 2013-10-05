@@ -1,4 +1,59 @@
-function ExtentLayer(olMap, projectConfig, radioButtonTagName) {
+require(["dijit/Dialog", "dijit/form/TextBox", "dijit/form/Button",
+    "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+    "dijit/TitlePane", "dijit/form/HorizontalSlider"]);
+
+
+var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+var app = {layers:{},
+        currentLayer:'',
+        geoJsonParser: new OpenLayers.Format.GeoJSON(),
+        wktParser: new OpenLayers.Format.WKT(),
+        renderer: (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers
+        };
+
+
+var map;
+
+dojo.ready(function () {
+    var mapDiv = 'terrainMapDiv';
+
+    var zoomlevels = 20;
+    map = new OpenLayers.Map(mapDiv,
+    {
+            allOverlays: false,
+            controls: [
+                        new OpenLayers.Control.Navigation({dragPanOptions: {enableKinetic: true}}),
+                        new OpenLayers.Control.PanZoomBar({}),
+                        new OpenLayers.Control.LayerSwitcher({})
+                    ],
+            projection: new OpenLayers.Projection("EPSG:3857"),
+            numZoomLevels: zoomlevels,
+            zoom:2
+    });
+
+
+//    terrainMap.addControl();
+//    terrainMap.addControl(new OpenLayers.Control.LayerSwitcher({}));
+
+
+    map.addLayers([
+    new OpenLayers.Layer.Google("Hybrid",
+    { type: google.maps.MapTypeId.HYBRID, numZoomLevels: zoomlevels}),
+    new OpenLayers.Layer.Google("Streets",
+    { numZoomLevels: zoomlevels }),
+    new OpenLayers.Layer.Google("Satellite",
+    { type: google.maps.MapTypeId.SATELLITE, numZoomLevels: zoomlevels}),
+    new OpenLayers.Layer.Google("Physical",
+    { type: google.maps.MapTypeId.TERRAIN, numZoomLevels: zoomlevels }
+    )]);
+
+    map.zoomToMaxExtent()
+
+    app.extentLayer = new DemBoundsLayer(map, 'set_extent_radio');
+});
+
+
+function DemBoundsLayer(olMap, radioButtonTagName) {
     this.olMap = olMap;
 
     //Define the layer style and layer
@@ -32,8 +87,6 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName) {
 
     olMap.addLayer(this.extentLayer);
 
-
-
     //All Draw controls are initialized, only those relevant to this layer will be loaded
     this.drawControls = {
         'DONE':{activate:function(){},deactivate:function(){}},
@@ -47,19 +100,6 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName) {
 
     this.deactivateAll();
 
-    //if extent has been set
-    if (projectConfig.geom){
-        var newFeat = new OpenLayers.Feature.Vector();
-        newFeat.fid = '1000000';
-        this.extentGeom = app.geoJsonParser.parseGeometry(projectConfig.geom);
-        newFeat.geometry = this.extentGeom;
-        var bounds = this.extentGeom.getBounds();
-        map.zoomToExtent(bounds, false);
-        this.extentLayer.addFeatures([newFeat]);
-
-        this.updateDEM();
-    }
-
     //Add the event listeners after loading
     this.extentLayer.events.on({
         "featureadded": this.addFeature,
@@ -68,7 +108,7 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName) {
 }
 
 //Activate the selected extent layer drawing tool
-ExtentLayer.prototype.radioChanged = function(){
+DemBoundsLayer.prototype.radioChanged = function(){
     for (var i= 0;i<this.extentRadioButtons.length;i++){
         var elId = this.extentRadioButtons[i].id;
         var toolName = elId.split('_')[0];
@@ -87,7 +127,7 @@ ExtentLayer.prototype.radioChanged = function(){
 };
 
 //Deactivate the controls when the panel is closed
-ExtentLayer.prototype.deactivateAll = function(){
+DemBoundsLayer.prototype.deactivateAll = function(){
     for (var i = 0; i< this.extentRadioButtons.length; i++){
         var theId = this.extentRadioButtons[i].id;
         var toolType = theId.split('_')[0];
@@ -106,11 +146,11 @@ ExtentLayer.prototype.deactivateAll = function(){
 };
 
 //Add the extent feature, check if there is only one, update on server
-ExtentLayer.prototype.addFeature = function(feat){
+DemBoundsLayer.prototype.addFeature = function(feat){
     var theFeat = feat.feature;
 
     if (app.extentLayer.extentLayer.features.length > 1) {
-        alert('A project can have only one extent. \nPlease clear the extent or modify the existing.');
+        alert('Only one extent can be displayed at a time. \nPlease clear the existing extent or modify the existing.');
         theFeat.destroy();
         return;
     }
@@ -124,17 +164,15 @@ ExtentLayer.prototype.addFeature = function(feat){
     var geoJSONObj = JSON.parse(app.geoJsonParser.write(theFeat));
     var srid = geoJSONObj.crs.properties.name;
 
-    var updateExtObj = {"updatetask": 1,
-                    "srid": srid,
-                    "geomWKT": wkt};
+    var checkGeomObject = {"srid": srid,
+                            "geomWKT": wkt};
 
     $.ajax({
-        url: $SCRIPT_ROOT + '/map/updateextent',
+        url: $SCRIPT_ROOT + '/map/checkgeometry',
         type: 'POST',
-        data: updateExtObj,
+        data: checkGeomObject,
         success: function (response) {
-            if (response.code == 1) {
-                projectProperties.geom = response.extGSJN;
+            if (response.valid) {
                 theFeat.fid = '1000000';
                 theFeat.attributes['fid'] = '1000000';
                 theFeat.state = null;
@@ -143,14 +181,7 @@ ExtentLayer.prototype.addFeature = function(feat){
             }
             else {
                 theFeat.destroy();
-                switch (response.code) {
-                    case -1:
-                        alert("Feature must not have self intersections");
-                        break;
-                    case -2:
-                        alert("Other Error");
-                        break;
-                }
+                alert("Feature must not have self intersections");
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
@@ -161,7 +192,7 @@ ExtentLayer.prototype.addFeature = function(feat){
 };
 
 //Modify the extent feature, update on server
-ExtentLayer.prototype.modifyFeature = function(feat){
+DemBoundsLayer.prototype.modifyFeature = function(feat){
     var theFeat = feat.feature;
     if (!theFeat.modified)
         //nothing really happened
@@ -186,17 +217,15 @@ ExtentLayer.prototype.modifyFeature = function(feat){
     var geoJSONObj = JSON.parse(app.geoJsonParser.write(theFeat));
     var srid = geoJSONObj.crs.properties.name;
 
-    var updateExtObj = {"updatetask": 2,
-                    "srid": srid,
-                    "geomWKT": wkt};
+    var checkGeomObject = {"srid": srid,
+                            "geomWKT": wkt};
 
     $.ajax({
-        url: $SCRIPT_ROOT + '/map/updateextent',
+        url: $SCRIPT_ROOT + '/map/checkgeometry',
         type: 'POST',
-        data: updateExtObj,
+        data: checkGeomObject,
         success: function (response) {
-            if (response.code == 1) {
-                projectProperties.geom = theFeat.geometry;
+            if (response.valid) {
                 theFeat.state = theFeat.modified = null;
                 app.extentLayer.extentGeom = theFeat.geometry;
                 app.extentLayer.updateDEM();
@@ -210,14 +239,7 @@ ExtentLayer.prototype.modifyFeature = function(feat){
                 console.log(featureBackup.fid);
                 app.extentLayer.extentLayer.events.register(
                     "featureadded", null, app.extentLayer.addFeature);
-                switch (response.code) {
-                    case -1:
-                        alert("Feature must not have self intersections");
-                        break;
-                    case -2:
-                        alert("Other Error");
-                        break;
-                }
+                alert("Feature must not have self intersections");
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
@@ -228,7 +250,7 @@ ExtentLayer.prototype.modifyFeature = function(feat){
 };
 
 //Delete the extent feature in map and on server
-ExtentLayer.prototype.clearExtent = function(){
+DemBoundsLayer.prototype.clearExtent = function(){
     //If there is no extent set, bail out
     if (this.extentLayer.features.length == 0){
         console.log('No existing extent');
@@ -237,39 +259,14 @@ ExtentLayer.prototype.clearExtent = function(){
 
     while (this.extentLayer.features.length > 0)
             this.extentLayer.features[0].destroy();
-    //update on server
-    $.ajax({
-        url: $SCRIPT_ROOT + '/map/updateextent',
-        type: 'POST',
-        data: {"updatetask": 3},
-        success: function (response) {
-            if (response.code != 1) {
-                console.log('someting wrong');
-                switch (response.code) {
-                    case -1:
-                        alert("Feature must not have self intersections");
-                        break;
-                    case -2:
-                        alert("Other Error");
-                        break;
-                }
-            }
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status);
-            alert(thrownError);
-        }
-    });
 
-    projectProperties.geom = null;
     app.extentLayer.extentGeom = null;
     app.extentLayer.updateDEM();
 };
 
-ExtentLayer.prototype.updateDEM = function(){
+DemBoundsLayer.prototype.updateDEM = function(){
     var olMap = this.olMap;
-    //hide the opacity slider
-    document.getElementById('demOpacityTitleContainer').style.display = 'none';
+
     if (this.demImage) {
         olMap.removeLayer(this.demImage);
         this.demImage.destroy();
@@ -298,15 +295,10 @@ ExtentLayer.prototype.updateDEM = function(){
             app.extentLayer.demImage.setOpacity(demOpacity);
             olMap.addLayer(app.extentLayer.demImage);
 
-
-//            var setIndex = 0;
-//            while (olMap.layers[setIndex].isBaseLayer && setIndex < olMap.layers.length){
-//                setIndex++;
-//            }
             olMap.setLayerZIndex(app.extentLayer.demImage, 0);
 
             //display the opacity controller
-            document.getElementById('demOpacityTitleContainer').style.display = 'inherit';
+            //document.getElementById('demOpacityTitleContainer').style.display = 'inherit';
         },
         error: function (xhr, ajaxOptions, thrownError) {
             alert(xhr.status);
@@ -314,3 +306,5 @@ ExtentLayer.prototype.updateDEM = function(){
         }
     });
 }
+
+

@@ -1,4 +1,7 @@
 {% extends "template.html" %}
+{% block head %}
+    <script src="{{ url_for('static', filename='js/terrainMap.js') }}"></script>
+{% endblock %}
 {% block content %}
         <div id="right">
             <h1>Latest Posts</h1>
@@ -16,10 +19,10 @@
             </div><br/>
         </div>
         <div id="left">
-            <h2>Continously Improving Terrain Model</h2>
+            <a href='{{ url_for('terrainMap') }}'><h2>Continously Improving Terrain Model</h2></a>
             <div class="text">
-                <img src="{{ url_for('static', filename='img/lyout/img1.jpg') }}"
-                     width="202" height="150" class="imgFloat" alt="" />
+                <a href='{{ url_for('terrainMap') }}'><img src="{{ url_for('static', filename='img/terrainMapImg.png') }}"
+                     width="202" height="150" class="imgFloat" alt=""/></a>
                 <span>
                     The best available terrain information is processed to create a hydrologically correct moedel
                     that can be used for a variety of applications.
@@ -35,10 +38,10 @@
                      <a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a>
                  </div>
             </div>
-            <h2>Terrain Based Applications</h2>
+            <a href='#' id='aShowInfraMapDialogHeader'><h2>Terrain Based Applications</h2></a>
             <div class="text">
-                <img src="{{ url_for('static', filename='img/lyout/img2.jpg') }}"
-                     width="152" height="102" class="imgFloat" alt="" />
+                <a href='#' id='aShowInfraMapDialog'><img src="{{ url_for('static', filename='img/lyout/img2.jpg') }}"
+                     width="152" height="102" class="imgFloat" alt="" /></a>
                 <span>
                     Preliminary infrastructure design is possible with the digital terrain map maintained by
                     Open Terrain Map.  The first design generation algorithms are being built for gravity fed

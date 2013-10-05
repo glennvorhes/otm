@@ -38,7 +38,7 @@ body {
     position: absolute;
     right: 10px;
     top: 10px;
-    z-index: 999;
+    /*z-index: 999;*/
     font-size:14px;font-family:Arial Narrow, rial, Helvetica, sans-serif;
     height: 40px;
     width: 150px;

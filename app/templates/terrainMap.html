@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% if title %}
+            <title>Web Based Infrastructure Design - {{title}}</title>
+        {% else %}
+            <title>Web Based Infrastructure Design - Map</title>
+        {% endif %}
+        <script src='{{url_for('static', filename='js/dojo/dojo/dojo.js')}}' djConfig="parseOnLoad: true"></script>
+        <link rel="stylesheet" href="{{url_for('static', filename='js/dojo/dijit/themes/soria/soria.css')}}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui-1.10.3.min.css') }}">
+        <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/jquery-ui-1.10.3.min.js') }}"></script>
+        <script src='{{url_for('static', filename='js/OpenLayers.js')}}'></script>
+        <script src="{{ url_for('static', filename='js/homePageMaps.js') }}"></script>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+        <style type="text/css">
+            html, body {
+              width: 100%;
+              height: 100%;
+              margin: 0;
+            }
+            #borderContainer {
+              width: 100%;
+              height: 100%;
+            }
+        </style>
+        <script>
+            $SCRIPT_ROOT={{ request.script_root|tojson|safe }};
+        </script>
+    </head>
+    <body class='soria'>
+        <div data-dojo-type="dijit/layout/BorderContainer"
+            data-dojo-props="design:'sidebar', gutters:true, liveSplitters:true" id="borderContainer">
+            <div id='terrainMapDiv' data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+                <div style="position: absolute; top: 10px; left: 53px; z-index: 999;">
+                    <input type="radio" id="DONE_set_extent_radio" name="set_extent_radio" checked="checked"
+                    onchange='app.extentLayer.radioChanged();' style='display: none;'/>
+                    <label for="DONE_set_extent_radio">
+                        <img src="{{ url_for('static', filename='img/icons/DONE_on.png') }}"
+                                alt="Set Extent Done" title='Deactivate Extent Tools'
+                                id='DONE_set_extent_radio_imgLabel' style='margin: 3px;'>
+                    </label>
+                    <input type="radio" id="POLYGON_set_extent_radio" name="set_extent_radio"
+                            onchange='app.extentLayer.radioChanged();' style='display: none;'/>
+                    <label for="POLYGON_set_extent_radio">
+                        <img src="{{ url_for('static', filename='img/icons/POLYGON_off.png') }}"
+                                alt="Set Extent"  title='Draw Extent Feature'
+                                id='POLYGON_set_extent_radio_imgLabel' style='margin: 3px;'>
+                    </label>
+                    <input type="radio" id="MODIFY_set_extent_radio" name="set_extent_radio"
+                            onchange='app.extentLayer.radioChanged();' style='display: none;'/>
+                    <label for="MODIFY_set_extent_radio">
+                        <img src="{{ url_for('static', filename='img/icons/MODIFY_off.png') }}"
+                                alt="Set Extent" title='Modify existing extent'
+                                id='MODIFY_set_extent_radio_imgLabel' style='margin: 3px;'>
+                    </label>
+                    <img src="{{ url_for('static', filename='img/icons/DELETE_on.png') }}"
+                        alt="Del Extent" title='Clear extent' style='margin: 3px;'
+                            onclick="app.extentLayer.clearExtent();">
+                </div>
+                <div id='demOpacityTitleContainer' style="position: absolute; left:210px; top:10px; z-index:999; width:200px;">
+                    <div id='demOpacityTitle' data-dojo-type="dijit/TitlePane"
+                        data-dojo-props="title:'Elevation Opacity', closable:false, open:false, region:'center'"
+                        onMouseLeave="var demOp = dijit.byId('demOpacityTitle'); if (demOp.open) demOp.toggle()">
+                        <div data-dojo-type="dijit.layout.ContentPane" style="width:200px; height:60px; overflow:auto">
+                            <div id="opacitySliderConentDiv">
+                                <div id="demOpacitySlider"
+                                    style="width:160px;"
+                                    data-dojo-type="dijit/form/HorizontalSlider"
+                                    data-dojo-props='value:50, minimum: 0, maximum:100,
+                                    onChange:function(val){ if (!app.extentLayer.demImage) {return;} app.extentLayer.demImage.setOpacity(val / 100); },
+                                    showButtons:true,
+                                    intermediateChanges:false,
+                                    discreteValues: 5,
+                                    disabled:false'>
+                                    <div data-dojo-type="dijit/form/HorizontalRule" container="bottomDecoration"
+                                        count=5 style="height:5px;"></div>
+                                    <ol data-dojo-type="dijit/form/HorizontalRuleLabels" container="bottomDecoration"
+                                        style="height:1em;font-size:75%;color:gray;">
+                                        <li>0%</li>
+                                        <li>50%</li>
+                                        <li>100%</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <span style="color: gray;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set Opacity</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

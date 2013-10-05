@@ -8,16 +8,22 @@
             <title>Open Terrain Map</title>
         {% endif %}
         <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui-1.10.3.min.css') }}">
+        <link rel="stylesheet" href="{{url_for('static', filename='js/dojo/dijit/themes/soria/soria.css')}}">
         <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js') }}"></script>
         <script src="{{ url_for('static', filename='js/jquery-ui-1.10.3.min.js') }}"></script>
         <link href="{{ url_for('static', filename='css/tmplstyle.css') }}" rel="stylesheet" type="text/css" />
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+        <script src='{{url_for('static', filename='js/OpenLayers.js')}}'></script>
+{#        <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.js"></script>#}
+{#        <script src='http://openlayers.org/dev/OpenLayers.js'></script>#}
+        <script src='{{url_for('static', filename='js/dojo/dojo/dojo.js')}}' djConfig="parseOnLoad: true"></script>
         <script type=text/javascript>
             $SCRIPT_ROOT={{ request.script_root|tojson|safe }};
-            console.log('hat');
         </script>
         {% block head %}{% endblock head%}
     </head>
-    <body>
+    <body class='soria'>
     {#{% with messages = get_flashed_messages() %}#}
     {#{% if messages %}#}
     {#<ul>#}
@@ -42,7 +48,7 @@
                     </ul>
                 </div>
                 <div class='pageBlock'>
-                    <img src="{{ url_for('static', filename='img/lyout/logo.jpg') }}" alt='logo' />
+                    <img src="{{ url_for('static', filename='img/lyout/banner.png') }}" alt='logo' />
                     <div id="loginControl" class="pageBlock">
                         {% if g.user.is_authenticated() %}
                             Logged in as: <br/>

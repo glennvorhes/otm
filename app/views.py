@@ -26,24 +26,10 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
-@app.route('/testparams')
-def testParams():
-    hasError = False
+@app.route('/terrainmap')
+def terrainMap():
+    return render_template('terrainMap.html', title='Terrain Map')
 
-    srid = request.args.get('srid', '')
-    if srid == '':
-        srid = 4236
-    try:
-        srid = long(srid)
-    except:
-        hasError = True
-
-    geomWKT = request.args.get('geom', '')
-
-    if geomWKT == '':
-        hasError = True
-
-    return 'stuff    {0}   {1}'.format(srid, geomWKT)
 
 @app.route('/get_image')
 def get_image():
@@ -382,6 +368,24 @@ def editfeaturegeom():
     updateFeature.geom = newGeom
     db_session.commit()
     return jsonify(fid=featFID)
+
+@app.route('/map/checkgeometry', methods=['POST'])
+def checkGeometry():
+    geomWKT = str(request.form["geomWKT"])
+    srid_raw = str(request.form["srid"])
+    # Just need the SRID number
+    srid = long(srid_raw[srid_raw.find(':')+1:])
+
+    newGeom = WKTElement(geomWKT, srid=srid)
+    # Check the geometry before proceeding
+    # geomSimple =  db_session.scalar(func.is_simple(newGeom))
+    # geomValid =  db_session.scalar(func.is_valid(newGeom))
+    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+
+    if geomValid:
+        return jsonify(valid=True)
+    else:
+        return jsonify(valid=False)
 
 @app.route('/map/updateextent', methods=['POST'])
 @login_required

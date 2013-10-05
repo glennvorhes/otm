@@ -129,8 +129,7 @@ dojo.ready(function () {
         {
             allOverlays: false,
             controls: [
-                        new OpenLayers.Control.Navigation({zoomWheelEnabled: true,
-                                            dragPanOptions: {enableKinetic: true}}),
+                        new OpenLayers.Control.Navigation({dragPanOptions: {enableKinetic: true}}),
                         new OpenLayers.Control.PanZoomBar({}),
                         new OpenLayers.Control.LayerSwitcher({})
                     ],
