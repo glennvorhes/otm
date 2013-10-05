@@ -1,4 +1,5 @@
-function ExtentLayer(olMap, projectConfig, radioButtonTagName) {
+function ExtentLayer(olMap, projectConfig, radioButtonTagName, publicExample) {
+    this.publicExample = publicExample
     this.olMap = olMap;
 
     //Define the layer style and layer

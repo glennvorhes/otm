@@ -26,6 +26,8 @@ var app = {layers:{},
 
 //Project setup, called on dojo.ready, Create Layers, Panels, Layer Specific Event Listeners
 function setupProject(){
+
+
     //Accordion pane must be visible to add content panes
     dijit.byId('tabContainer').selectChild('inputsTab');
     var fidWidth = '35px';
@@ -41,19 +43,19 @@ function setupProject(){
                                 {dataField:'owner',         displayField:'Owner',           width:txtWidth},
                                 {dataField:'occupants',     displayField:'Occupants',       width: numWidth}];
         app.layers['dwelling'] = new MyFeatureLayer(map, 'dwelling','Digitize Dwellings',
-            ['POLYGON'],dwellingColumns,"#00E600");
+            ['POLYGON'],dwellingColumns,"#00E600", projectProperties.publicExample);
         var impedanceColumns = [{dataField:'fid',           displayField:'FID',             width:fidWidth},
                                 {dataField:'impedance',     displayField:'Impedance',       width:txtWidth}];
         app.layers['impedance'] = new MyFeatureLayer(map, 'impedance','Identify Barriers',
-            ['LINESTRING','POLYGON'],impedanceColumns,"#FFCC00");
+            ['LINESTRING','POLYGON'],impedanceColumns,"#FFCC00", projectProperties.publicExample);
         var tankColumns =      [{dataField:'fid',           displayField:'FID',             width:fidWidth},
                                 {dataField:'description',   displayField:'Tank Site',       width:txtWidth}];
         app.layers['tank'] = new MyFeatureLayer(map, 'tank','Septic Tank Sites',
-            ['POLYGON'],tankColumns,"#2EFEF7");
+            ['POLYGON'],tankColumns,"#2EFEF7", projectProperties.publicExample);
         var treatmentColumns =      [{dataField:'fid',           displayField:'FID',             width:fidWidth},
                                      {dataField:'description',   displayField:'Treatment Site',  width:txtWidth}];
         app.layers['treatment'] = new MyFeatureLayer(map, 'treatment','Water Treatment Sites',
-            ['POLYGON'],treatmentColumns,"#2EFEF0");
+            ['POLYGON'],treatmentColumns,"#2EFEF0",projectProperties.publicExample);
       break;
     case 2:
         //Water Supply
@@ -61,20 +63,20 @@ function setupProject(){
                                 {dataField:'owner',         displayField:'Owner',           width:txtWidth},
                                 {dataField:'occupants',     displayField:'Occupants',       width:numWidth}];
         app.layers['dwelling'] = new MyFeatureLayer(map, 'dwelling','Digitize Dwellings',
-            ['POINT'],dwellingColumns,"#00E600");
+            ['POINT'],dwellingColumns,"#00E600",projectProperties.publicExample);
         var impedanceColumns = [{dataField:'fid',           displayField:'FID',             width:fidWidth},
                                 {dataField:'impedance',     displayField:'Impedance'}];
         app.layers['impedance'] = new MyFeatureLayer(map, 'impedance','Identify Barriers',
-            ['LINESTRING','POLYGON'],impedanceColumns,"#FFCC00");
+            ['LINESTRING','POLYGON'],impedanceColumns,"#FFCC00", projectProperties.publicExample);
         var waterColumns =      [{dataField:'fid',           displayField:'FID',             width:fidWidth},
                                 {dataField:'description',   displayField:'Description',     width:txtWidth},
                                 {dataField:'flow_rate_gpm', displayField:'FlowRate',        width:numWidth}];
         app.layers['water'] = new MyFeatureLayer(map, 'water','Water Sources',
-            ['POINT'],waterColumns,"#FF4000");
+            ['POINT'],waterColumns,"#FF4000", projectProperties.publicExample);
         var tankColumns =      [{dataField:'fid',           displayField:'FID',         width:fidWidth},
                                 {dataField:'description',   displayField:'Tank Site',   width:txtWidth}];
         app.layers['tank'] = new MyFeatureLayer(map, 'tank','Water Tank Sites',
-            ['POLYGON'],tankColumns,"#2EFEF7");
+            ['POLYGON'],tankColumns,"#2EFEF7", projectProperties.publicExample);
         break;
     default:
         alert('Project Type Not Determined')
@@ -155,16 +157,26 @@ dojo.ready(function () {
     //addDemHillshade(projectProperties.pid, map);
 
     //Add the extent layer feature if it exists for the project
-    app['extentLayer'] = new ExtentLayer(map, projectProperties, 'set_extent_radio');
+    app['extentLayer'] = new ExtentLayer(map, projectProperties, 'set_extent_radio', projectProperties.publicExample);
 
     //Add layers and dojo panels specific to the project Type, Water Supply or Sewerage
-    setupProject();
+    setupProject(projectProperties.publicExample);
+
+    var getFeaturesURL;
+    if (projectProperties.publicExample){
+        getFeaturesURL =  $SCRIPT_ROOT + '/map/getexamplefeatures?' + rand1 + '=' + rand2;
+    }
+    else{
+        /*Cache buster, ensures features are loaded from server and not browser cache
+        get featuresUrl has random request parameters ex:  ..getfeatures?479223=752453 */
+        getFeaturesURL =  $SCRIPT_ROOT + '/map/getfeatures?' + rand1 + '=' + rand2;
+    }
 
     //Get the project features
     $.ajax({
         /*Cache buster, ensures features are loaded from server and not browser cache
         get featuresUrl has random request parameters ex:  ..getfeatures?479223=752453 */
-        url: $SCRIPT_ROOT + '/map/getfeatures?' + rand1 + '=' + rand2,
+        url: getFeaturesURL,
         type: 'GET',
         data: {},
         success: function (response) {
@@ -187,10 +199,10 @@ dojo.ready(function () {
             //Add the vector layer event listeners after loading
             for (var key in app.layers){
                 app.layers[key].vectorLayer.events.on({
-                "featureadded": app.layers[key].addFeature,
-                "afterfeaturemodified": app.layers[key].modifyFeature,
-                "featureselected": app.layers[key].selectFeature,
-                "featureunselected": app.layers[key].unselectFeature
+                    "featureadded": function(feat){app.layers[key].addFeature(feat);},
+                    "afterfeaturemodified": function(feat){app.layers[key].modifyFeature(feat);},
+                    "featureselected": function(feat){app.layers[key].selectFeature(feat);},
+                    "featureunselected": function(feat){app.layers[key].unselectFeature(feat);}
                 });
             }
         },

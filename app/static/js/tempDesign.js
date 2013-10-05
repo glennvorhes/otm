@@ -611,11 +611,10 @@ tempDesign.pipe = {
 };
 
 function generateDesign(){
-//    var designTimeout = 25;
-    var designTimeout = 4000;
+    var designTimeout = 2000;
 
     //Add the temporary design layers here
-    if (projectProperties.pid != 1){
+    if (!(projectProperties.pid == 1 || projectProperties.pid == -1)){
         alert('Design function not available');
         return;
     }

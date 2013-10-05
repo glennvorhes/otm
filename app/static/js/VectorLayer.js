@@ -1,4 +1,5 @@
-﻿function MyFeatureLayer (olMap, myFeatureLayerName,panelTitle,drawTypeArray,dataColumns,color) {
+﻿function MyFeatureLayer (olMap, myFeatureLayerName,panelTitle,drawTypeArray,dataColumns,color, publicExample) {
+    this.publicExample = publicExample;
     this.myFeatureLayerName = myFeatureLayerName;
     //GeoJSON object with the features in this layerf
     this.geojson = {type:"FeatureCollection",
@@ -29,9 +30,12 @@
         'select': vector_style_select
     });
 
+    var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+
+
     this.vectorLayer = new OpenLayers.Layer.Vector(myFeatureLayerName, {
         'styleMap': vector_style_map,
-        'renderers': app.renderer
+        'renderers': (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers
     });
 
     var thisVectorLayer = this.vectorLayer;
@@ -139,7 +143,7 @@
     newEl.appendChild(doneImg);
 
 
-    //Create the dojo panel to be loaded into the accordion
+    //Create the dijit panel to be loaded into the accordion
     //can use a normal dom element for the content
     new dijit.layout.ContentPane({
         id: myFeatureLayerName +'_input',
@@ -275,6 +279,7 @@ MyFeatureLayer.prototype.addFeature = function(feat) {
 
 
                 var featProps = response.featureProperties;
+                console.log(featProps);
                 var newDataItem = {};
                 var dataColumns = app.layers[app.currentLayer].dataColumns;
                 for (var i=0;i<dataColumns.length;i++){

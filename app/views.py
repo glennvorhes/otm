@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 import psycopg2
 from config import ConnStringDEM_DB
 import base64
+import exampleFeatures
 
 
 @app.route('/testurl')
@@ -29,6 +30,33 @@ def testtemplate():
 @app.route('/terrainmap')
 def terrainMap():
     return render_template('terrainMap.html', title='Terrain Map')
+
+@app.route('/infraexample')
+def infraExample():
+    if 'currentProject' in session.keys():
+        del session['currentProject']
+     # It doesn't like to put the geom in the session
+    # Just make a dictionary with a geojson string,
+    # Saves us having to get the features later
+    props = {}
+    props['pid'] = -1
+    props['uid'] = -1
+    props['tid'] = 2
+    props['project_name'] = "Example Project"
+    props['created'] = datetime.now().strftime('%Y-%m-%d')
+    props['last_modfied'] = datetime.now().strftime('%Y-%m-%d')
+    props['description'] = "Gravity Fed Water Supply"
+    props['geom'] = exampleFeatures.exampleExtent
+    props['publicExample'] = True
+
+    jsonProps = simplejson.dumps(props)
+    return render_template('map.html',
+                           title=props['project_name'],
+                           jsonProps=jsonProps)
+
+@app.route('/map/getexamplefeatures')
+def getExampFeat():
+    return exampleFeatures.exampleFeatJSON
 
 
 @app.route('/get_image')
@@ -214,6 +242,8 @@ def before_request():
 
 @app.route('/logout')
 def logout():
+    for key in session.keys():
+        del session[key]
     logout_user()
     return redirect(url_for('index'))
 
@@ -281,11 +311,11 @@ def showmap():
              'description': thistype.description
              }
 
-    print thisproj.geom
-    if not thisproj.geom is None:
-        props['geom'] = db_session.scalar(func.ST_AsGeoJSON(thisproj.geom))
-    else:
+    if thisproj.geom is None:
         props['geom'] = None
+    else:
+        props['geom'] = db_session.scalar(func.ST_AsGeoJSON(thisproj.geom))
+        print props['geom']
 
     session['currentProject'] = props
 
@@ -310,7 +340,7 @@ def addfeature():
     geomValid = db_session.scalar(func.ST_IsValid(newGeom))
     # geomValid =  db_session.scalar(func.is_valid(newGeom))
     if not (geomValid):
-        return jsonify(fid=-1)
+        return jsonify(fid=-1,valid=False)
 
     proj = db_session.query(models.Project).get(session['currentProject']['pid'])
 
@@ -344,7 +374,6 @@ def addfeature():
             continue
         else:
             featureProperties[p]=getattr(newFeature, p)
-            print p, featureProperties[p]
 
     return jsonify(fid=newFeature.fid, featureProperties=featureProperties)
 
@@ -381,6 +410,45 @@ def checkGeometry():
     # geomSimple =  db_session.scalar(func.is_simple(newGeom))
     # geomValid =  db_session.scalar(func.is_valid(newGeom))
     geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+
+    currentLayer = str(request.form["currentLayer"]).upper()
+
+    newGeom = WKTElement(geomWKT, srid=srid)
+    # Check the geometry before proceeding
+    # geomSimple =  db_session.scalar(func.is_simple(newGeom))ST_IsValid
+    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+    # geomValid =  db_session.scalar(func.is_valid(newGeom))
+    if not (geomValid):
+        return jsonify(fid=-1,valid=False)
+
+
+    #
+    #
+    #
+    #     currentLayer = str(request.form["currentLayer"]).upper()
+    # if 'currentLayer'
+    #
+    #
+    # if currentLayer == 'DWELLING' and geomType == 'POINT':
+    #     newFeature = models.Dwelling_Point(prj=proj, geom=newGeom)
+    # elif currentLayer == 'DWELLING' and geomType == 'POLYGON':
+    #     newFeature = models.Dwelling_Polygon(prj=proj, geom=newGeom)
+    # elif currentLayer == 'IMPEDANCE' and geomType == 'LINESTRING':
+    #     newFeature = models.Impedance_LineString(prj=proj, geom=newGeom)
+    # elif currentLayer == 'IMPEDANCE' and geomType == 'POLYGON':
+    #     newFeature = models.Impedance_Polygon(prj=proj, geom=newGeom)
+    # elif currentLayer == 'WATER'and geomType == 'POINT':
+    #     newFeature = models.Water_Source(prj=proj, geom=newGeom)
+    # elif currentLayer == 'TANK' and geomType == 'POLYGON':
+    #     newFeature = models.Tank_Site(prj=proj, geom=newGeom)
+    # elif currentLayer == 'TREATMENT' and geomType == 'POLYGON':
+    #     newFeature = models.Treatment_Site(prj=proj, geom=newGeom)
+    # else:
+    #     return jsonify(fid=-2)
+    #
+    #
+    #
+
 
     if geomValid:
         return jsonify(valid=True)
@@ -432,30 +500,3 @@ def deletefeature():
     db_session.commit()
     return jsonify(success=0)
 
-
-#
-# @app.route('/getelevtile')
-# def getElevTile():
-#     conn = None
-#     try:
-#         conn = psycopg2.connect(database="WebDevelop", user="postgres", password="turkey",
-#                             host='localhost')
-#
-#         cur = conn.cursor()
-#         cur.execute('select ST_AsPNG(ST_HillShade(ST_Transform(ST_AddBand(ST_Union(rast,1), ARRAY[ST_Union(rast,1)]), 3857),1,\'8BUI\',315,45,255,1)) from demelevation where (rid > 100 and rid < 105)')
-#         ver = cur.fetchone()
-#         print ver
-#         return send_file(ver, mimetype='image/png')
-#
-#
-#     except psycopg2.DatabaseError, e:
-#         print 'Error %s' % e
-#         sys.exit(1)
-#
-#
-#     finally:
-#
-#         if conn:
-#             conn.close()
-#
-#     return 'stuff'

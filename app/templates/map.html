@@ -34,7 +34,7 @@
             if (projectProperties.geom)
                 projectProperties.geom = JSON.parse(projectProperties.geom);
             var imgURL = "{{ url_for('static',filename='img')}}/";
-            var userEmail = "{{ g.user.email }}";
+            var userEmail = "{% if g.user.is_authenticated() %}{{ g.user.email }}{% else %}{{ "" }}{% endif %}";
         </script>
 
         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -64,18 +64,30 @@
                     <div id='tabContainer' dojoType="dijit.layout.TabContainer" attachParent="true" tabPosition="top"
                         tabStrip="true" data-dojo-props="region:'center'">
                         <div id="homeTab" class="roundedCorners" data-dojo-type="dijit.layout.ContentPane" title="Home">
-                            <h4>Logged in as user: {{g.user.nickname}}</h4>
+                            {% if g.user.is_authenticated() %}
+                                <h4>Logged in as user: {{g.user.nickname}}</h4>
+                            {% endif %}
                             <a href="{{ url_for('index') }}">Home</a><br/>
-                            <a href="{{ url_for('getProjects') }}">Projects</a><br/>
+                            {% if g.user.is_authenticated() %}
+                                <a href="{{ url_for('getProjects') }}">Projects</a><br/>
+                            {% endif %}
                             {% if g.user.is_authenticated() %}
                                 <a href="{{ url_for('logout') }}">Logout</a><br/>
                             {% endif %}
                             <h4>Project Information</h4>
                             <table>
-                                <tr><td>Name: </td><td>{{ session['currentProject']['project_name'] }}</td></tr>
-                                <tr><td>Type: </td><td>{{ session['currentProject']['description'] }}</td></tr>
-                                <tr><td>Created: </td><td>{{ session['currentProject']['created'] }}</td></tr>
-                                <tr><td>Modified: </td><td>{{ session['currentProject']['last_modfied'] }}</td></tr>
+                                <tr><td>Name: </td><td>
+                                    <script>document.write(projectProperties.project_name);</script>
+                                </td></tr>
+                                <tr><td>Type: </td><td>
+                                    <script>document.write(projectProperties.description);</script>
+                                </td></tr>
+                                <tr><td>Created: </td><td>
+                                    <script>document.write(projectProperties.created);</script>
+                                </td></tr>
+                                <tr><td>Modified: </td><td>
+                                    <script>document.write(projectProperties.last_modfied);</script>
+                                </td></tr>
                             </table>
                         </div>
                         <div id='inputsTab' data-dojo-type="dijit.layout.AccordionContainer" title="Inputs">
