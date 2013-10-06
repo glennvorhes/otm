@@ -45,6 +45,7 @@ lm.login_view = 'login'
 
 # OpenID needs a scratch directory, define location here
 oid = OpenID(app, os.path.join(basedir, 'tmp'))
+tempZipDir = os.path.join(basedir, 'tmp/tempzip')
 
 # import other modules so they can be accessed from 'app'
 from app import views, models

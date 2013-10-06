@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, make_response
 from flask_login import login_user, logout_user, current_user, login_required
-from app import app, db_session, lm, oid, models
+from app import app, db_session, lm, oid, models, tempZipDir
 import forms
 from geoalchemy2.elements import WKTElement
 from datetime import datetime
@@ -11,6 +11,8 @@ import psycopg2
 from config import ConnStringDEM_DB
 import base64
 import exampleFeatures
+import os
+import uuid
 
 
 @app.route('/testurl')
@@ -148,27 +150,45 @@ def exampleUpdateExtent():
 
 
 @app.route('/getdem')
-def getImage():
+def getDem():
     hasError = False
     outSrid = request.args.get('outsrid', '4326')
     inSrid = request.args.get('insrid', '4326')
+    geomWKT = request.args.get('geom', '')
+    outFormat = request.args.get('outformat', 'imagepng')
+
+    if geomWKT == '':
+        return render_template('getDem.html', title='Get Elevation Model')
 
     try:
         outSrid = long(outSrid)
+        inSrid = long(inSrid)
     except:
         hasError = True
-
-    geomWKT = request.args.get('geom', '')
 
     if geomWKT == '':
         hasError = True
 
     if hasError:
-        return 'error'
+        return 'error: check inputs'
 
-    getBase64 = request.args.get('base64', '')
+    isGeomValid = True
+
     conn = psycopg2.connect(ConnStringDEM_DB)
     cur = conn.cursor()
+
+    try:
+        cur.execute("select ST_IsValid(ST_GeomFromText('{0}',{1})) as isvalid".format(geomWKT, inSrid))
+        isGeomValid = bool(cur.fetchone()[0])
+
+    except:
+        conn.close()
+        del conn, cur
+        isGeomValid = False
+
+    # Bail out if the geometry isn't valid
+    if not isGeomValid:
+        return 'geom not valid'
 
     query = "SELECT \
         ST_AsPNG(\
@@ -184,13 +204,20 @@ def getImage():
     buffer = cur.fetchone()[0]
     conn.close()
 
-    # if getBase64 is true, return the base64 representation of the raster
-    if getBase64:
+    # if outFormat is  base64png is true, return the base64 representation of the raster
+    if outFormat == 'base64png':
         return base64.b64encode(buffer)
+    elif outFormat == 'zip':
+        uniqueTempDirectory = os.path.join(tempZipDir, str(uuid.uuid1()))
+        os.makedirs(uniqueTempDirectory)
+        tempFolder = os.path.join(uniqueTempDirectory, 'demDownload')
+        os.makedirs(tempFolder)
 
-    response = make_response(str(buffer))
-    response.headers['Content-Type'] = 'image/png'
-    return response
+        return 'not yet implemented' + tempFolder + str(buffer)
+    else:
+        response = make_response(str(buffer))
+        response.headers['Content-Type'] = 'image/png'
+        return response
 
 @app.route('/addpost', methods=['GET', 'POST'])
 @login_required

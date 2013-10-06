@@ -1,0 +1,68 @@
+{% extends "template.html" %}
+{% block head %}
+    <style>
+        div p {
+            width: 400px;
+            padding-left: 20px;
+            text-align: justify;
+        }
+    </style>
+
+{% endblock %}
+{% block content %}
+    <div>
+        <h2>Get Elevation Model URL Structure</h2>
+
+        <span>
+            {{ request.url_root }}getdem?insrid=<<i>SRID Code</i>>&outsrid=<<i>SRID Code</i>
+            >&outformat=<<i>Output Format</i>>&geom=<<i>Geometry Text</i>>
+        </span>
+        <br/>
+        <br/>
+        <h1>Input Parameters</h1>
+        <h3>SRID Code</h3>
+        <p>
+            The spatial reference identifiers for the input geometry and the returned image.
+            The default SRID is 4326 for WGS 1984.  SRID 3857 is the most commonly used
+            reference for working with web mercator maps.
+        </p>
+        <h3>Output Format</h3>
+        <p>
+            <ul>
+                <li><b>imagepng</b> Returns a png image to the browser.  This is the default.</li>
+                <li>
+                    <b>base64png</b> The base 64 representation of the PNG.  <br/>This is useful for
+                    adding the returned results to an image tag or url in the <br/>context of
+                    src/url = 'data:image/png;base64,<<i>base 64 string</i>></li>
+                <li><b>imagepng</b> Returns a png image to the browser.  This is the default.</li>
+
+            </ul>
+        </p>
+        <h3>Geometry Text</h3>
+        <p>
+            The well known text (WKT) representation of the polygon input geometry with
+            the following format for an input geometry with four corners points P1 trhough P4, each
+            with coordinates x and y.  Note the double parentheses and that first point is repeated at the end to represent
+            the closure of the polygon<br/>
+            <i>POLYGON((C1X C1Y,C2X C2Y,C3X C3Y,C4X C4Y,C1X C1Y))</i>
+        </p>
+        <h1>Examples</h1>
+
+        <h2>Get PNG image</h2>
+        <a href="{{ request.url_root }}getdem?outformat=imagepng&insrid=4326&outsrid=3857&geom=POLYGON((-71.02308 19.037060,-71.01501 19.017667,-70.97570 19.015314,-70.99355 19.037953,-71.02308 19.037060))">
+            {{ request.url_root }}getdem?outformat=imagepng&insrid=4326&outsrid=3857&<br/>geom=POLYGON((-71.02308 19.037060,-71.01501 19.017667,-70.97570 19.015314,-70.99355 19.037953,-71.02308 19.037060))
+        </a>
+
+        <h2>Get PNG base 64 String</h2>
+        <a href="{{ request.url_root }}getdem?outformat=base64png&insrid=4326&outsrid=3857&geom=POLYGON((-71.02308 19.037060,-71.01501 19.017667,-70.97570 19.015314,-70.99355 19.037953,-71.02308 19.037060))">
+            {{ request.url_root }}getdem?outformat=base64png&insrid=4326&outsrid=3857&<br/>geom=POLYGON((-71.02308 19.037060,-71.01501 19.017667,-70.97570 19.015314,-70.99355 19.037953,-71.02308 19.037060))
+        </a>
+
+        <h2>Download image with spatial reference</h2>
+        <a href="{{ request.url_root }}getdem?outformat=zip&insrid=4326&outsrid=3857&geom=POLYGON((-71.02308 19.037060,-71.01501 19.017667,-70.97570 19.015314,-70.99355 19.037953,-71.02308 19.037060))">
+            {{ request.url_root }}getdem?outformat=zip&insrid=4326&outsrid=3857&<br/>geom=POLYGON((-71.02308 19.037060,-71.01501 19.017667,-70.97570 19.015314,-70.99355 19.037953,-71.02308 19.037060))
+        </a>
+
+    </div>
+{% endblock %}
+
