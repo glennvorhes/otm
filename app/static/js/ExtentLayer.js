@@ -326,7 +326,7 @@ ExtentLayer.prototype.updateDEM = function(){
     var thisObj = this;
 
     $.ajax({
-        url: $SCRIPT_ROOT + '/get_image?base64=1&outsrid=3857&geom=' + extentWKT,
+        url: $SCRIPT_ROOT + '/getdem?base64=1&insrid=4326&outsrid=3857&geom=' + extentWKT,
         type: 'GET',
         data: {},
         success: function (response) {

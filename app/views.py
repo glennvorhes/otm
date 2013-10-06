@@ -147,10 +147,11 @@ def exampleUpdateExtent():
         return jsonify(code=-2)
 
 
-@app.route('/get_image')
-def get_image():
+@app.route('/getdem')
+def getImage():
     hasError = False
-    outSrid = request.args.get('outsrid', '4236')
+    outSrid = request.args.get('outsrid', '4326')
+    inSrid = request.args.get('insrid', '4326')
 
     try:
         outSrid = long(outSrid)
@@ -173,11 +174,11 @@ def get_image():
         ST_AsPNG(\
             ST_Transform(\
                 ST_Clip(\
-                    ST_Union(rast),ST_GeomFromText('{0}', 4236), true)\
+                    ST_Union(rast),ST_GeomFromText('{0}', 4326), true)\
                 ,{1})\
             )\
         FROM aster_gdem \
-        WHERE ST_Intersects(rast, ST_GeomFromText('{0}', 4236));".format(geomWKT, outSrid)
+        WHERE ST_Intersects(rast, ST_GeomFromText('{0}', 4326));".format(geomWKT, outSrid)
 
     cur.execute(query)
     buffer = cur.fetchone()[0]
