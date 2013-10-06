@@ -117,8 +117,7 @@ dojo.ready(function () {
     //General init statements, renderers, reset radio buttons, num Zoom levels, cache buster, etc.
     {
     var zoomlevels =20;
-    var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
-    app.renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
+
     document.getElementById('LocSearch').checked = true;
     DDDegMinOnChange();
 //    Random numbers for cache buster

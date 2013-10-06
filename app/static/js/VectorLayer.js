@@ -1,4 +1,7 @@
 ﻿function MyFeatureLayer (olMap, myFeatureLayerName,panelTitle,drawTypeArray,dataColumns,color, publicExample) {
+    var thisObj = this;
+
+
     this.publicExample = publicExample;
     this.myFeatureLayerName = myFeatureLayerName;
     //GeoJSON object with the features in this layerf
@@ -32,11 +35,13 @@
 
     var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
 
-
     this.vectorLayer = new OpenLayers.Layer.Vector(myFeatureLayerName, {
         'styleMap': vector_style_map,
         'renderers': (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers
     });
+
+    this.vectorLayer['parentCustomObject'] = this;
+
 
     var thisVectorLayer = this.vectorLayer;
 
@@ -45,9 +50,9 @@
 //    Add Select Control
     this.selectControl = new OpenLayers.Control.SelectFeature(thisVectorLayer);
     this.selectControl.allSelection = true;
-    var thisSelectControl = this.selectControl;
+    this.selectControl.autoActivate = false;
+    olMap.addControl(this.selectControl)
 
-    olMap.addControl(thisSelectControl);
 
     //All Draw controls are initialized, only those relevant to this layer will be loaded
     this.drawControls = {
@@ -96,14 +101,14 @@
                     //this is the control to activate
                     //Use the 'activated' image
                     theImg.src = theImgSrc.replace('_off','_on');
-                    app.layers[layerName].drawControls[drawControlType].activate();
+                    thisObj.drawControls[drawControlType].activate();
                 }
                 else{
                     //use the 'deactivated' image
                     theImg.src = theImgSrc.replace('_on','_off');
-                    app.layers[layerName].drawControls[drawControlType].deactivate();
+                    thisObj.drawControls[drawControlType].deactivate();
                 }
-                app.layers[layerName].selectControl.unselectAll();
+                thisObj.selectControl.unselectAll();
             }
         };
 
@@ -139,7 +144,7 @@
     doneImg.src = imgURL + 'icons/DELETE_off.png';
     doneImg.style.margin = '3px';
     doneImg.title = 'Delete feature';
-    doneImg.onclick = this.deleteFeature;
+    doneImg.onclick = function(){thisObj.deleteFeature();};
     newEl.appendChild(doneImg);
 
 
@@ -148,8 +153,8 @@
     new dijit.layout.ContentPane({
         id: myFeatureLayerName +'_input',
         title: panelTitle,
-        onShow: function(){app.layers[this.id.split('_')[0]].activateControls();},
-        onHide: function(){app.layers[this.id.split('_')[0]].deactivateControls();}
+        onShow: function(){thisObj.activateControls();},
+        onHide: function(){thisObj.deactivateControls();}
     }).placeAt('inputsTab');
 
     //Add the toolbar to the content pane
@@ -185,6 +190,8 @@
     this.attributeGrid.startup();
     this.attributeGrid.domNode.style.height = '100%';
 
+    this.attributeGrid['parentCustomObject'] = this;
+
     new dijit.layout.ContentPane({
       content:this.attributeGrid.domNode,
       style:"overflow: auto; height:85%"
@@ -201,6 +208,8 @@
     dojo.connect(thisAttributeGrid, "onRowDblClick", thisAttributeGridRowDoubleClick);
 
     this.deleteButton = document.getElementById('deleteFeat_' + myFeatureLayerName);
+
+
 }
 
 //load a feature parsed from geojson, add to vector layer and dojo grid
@@ -220,6 +229,7 @@ MyFeatureLayer.prototype.loadFeature = function(feature, geoJsonParser) {
 
 //Remove event listeners when the panel is closed
 MyFeatureLayer.prototype.deactivateControls = function(){
+    var thisObj = this;
     //Update the radio button selection and tool image indicators
     var thisMyFeatureLayerName = this.myFeatureLayerName;
     document.getElementById(thisMyFeatureLayerName + '_DONE').checked = true;
@@ -243,28 +253,29 @@ MyFeatureLayer.prototype.deactivateControls = function(){
     //Clear grid selection
     this.attributeGrid.selection.clear();
 
-    var delSrc = app.layers[app.currentLayer].deleteButton.src;
-    app.layers[app.currentLayer].deleteButton.src = delSrc.replace('_on','_off');
+    this.deleteButton.src = this.deleteButton.src.replace('_on','_off');
 };
 
 //Activate the event listeners when the layer panel is opened
 MyFeatureLayer.prototype.activateControls = function(){
-    app.currentLayer = this.myFeatureLayerName;
+//    app.currentLayer = this.myFeatureLayerName;
     this.selectControl.activate();
 };
 
 //On add feature, send to server, add to grid row, populate with default properties
 MyFeatureLayer.prototype.addFeature = function(feat) {
     var theFeat = feat.feature;
-    var wkt = app.wktParser.write(feat.feature);
-    var geoJSONObj = JSON.parse(app.geoJsonParser.write(feat.feature));
+    var thisObj = theFeat.layer.parentCustomObject;
+
+    var wkt = thisObj.wktParser.write(feat.feature);
+    var geoJSONObj = JSON.parse(thisObj.geoJsonParser.write(feat.feature));
     var geomType = geoJSONObj.geometry.type;
     var srid = geoJSONObj.crs.properties.name;
 
     var newFeatureData = {"srid": srid,
                         "geomType": geomType,
                         "geomWKT": wkt,
-                        "currentLayer": app.currentLayer};
+                        "currentLayer": thisObj.myFeatureLayerName};
 
     $.ajax({
         url: $SCRIPT_ROOT + '/map/addfeature',
@@ -277,18 +288,16 @@ MyFeatureLayer.prototype.addFeature = function(feat) {
                 theFeat.attributes['fid'] = responseFID
                 theFeat.state = null;
 
-
                 var featProps = response.featureProperties;
-                console.log(featProps);
                 var newDataItem = {};
-                var dataColumns = app.layers[app.currentLayer].dataColumns;
+                var dataColumns = thisObj.dataColumns;
                 for (var i=0;i<dataColumns.length;i++){
 
                     newDataItem[dataColumns[i].dataField] = featProps[dataColumns[i].dataField];
                 }
-                app.layers[app.currentLayer].featureStore.newItem(newDataItem);
-                app.layers[app.currentLayer].featureStore.save();
-                app.layers[app.currentLayer].attributeGrid.render();
+                thisObj.featureStore.newItem(newDataItem);
+                thisObj.featureStore.save();
+                thisObj.attributeGrid.render();
             }
             else {
                 theFeat.destroy();
@@ -312,9 +321,10 @@ MyFeatureLayer.prototype.addFeature = function(feat) {
 //Modify feature geometry
 MyFeatureLayer.prototype.modifyFeature = function(feat) {
     var theFeat = feat.feature;
+    var thisObj = theFeat.layer.parentCustomObject;
     var featureBackup = new OpenLayers.Feature.Vector(theFeat.modified.geometry, theFeat.attributes);
-    var wkt = app.wktParser.write(feat.feature);
-    var geoJSONObj = JSON.parse(app.geoJsonParser.write(feat.feature));
+    var wkt = thisObj.wktParser.write(feat.feature);
+    var geoJSONObj = JSON.parse(thisObj.geoJsonParser.write(feat.feature));
     var srid = geoJSONObj.crs.properties.name;
 
     var modifyFeatureData = {"srid": srid,
@@ -326,21 +336,20 @@ MyFeatureLayer.prototype.modifyFeature = function(feat) {
         type: 'POST',
         data: modifyFeatureData,
         success: function (response) {
-            console.log(response);
             var responseFID = response.fid;
             if (responseFID > 0) {
                 theFeat.state = theFeat.modified = null;
             }
             else {
                 theFeat.destroy();
-                app.layers[app.currentLayer].vectorLayer.events.unregister(
-                    "featureadded", null, app.layers[app.currentLayer].addFeature);
+                thisObj.vectorLayer.events.unregister(
+                    "featureadded", null, thisObj.addFeature);
                 featureBackup.fid = modifyFeatureData.fid.toString();
                 console.log(modifyFeatureData);
-                app.layers[app.currentLayer].vectorLayer.addFeatures([featureBackup]);
+                thisObj.vectorLayer.addFeatures([featureBackup]);
                 console.log(featureBackup.fid);
-                app.layers[app.currentLayer].vectorLayer.events.register(
-                    "featureadded", null, app.layers[app.currentLayer].addFeature);
+                thisObj.vectorLayer.events.register(
+                    "featureadded", null, thisObj.addFeature);
 
                 switch (responseFID) {
                     case -1:
@@ -362,8 +371,9 @@ MyFeatureLayer.prototype.modifyFeature = function(feat) {
 //On map select, select the corresponding grid row, an additional comment, another comment
 MyFeatureLayer.prototype.selectFeature = function(feat) {
     var theFeat = feat.feature;
+    var thisObj = theFeat.layer.parentCustomObject;
     var clickedFeatureFid = parseInt(theFeat.fid);
-    var gridItems = app.layers[app.currentLayer].attributeGrid.store._arrayOfAllItems;
+    var gridItems = thisObj.attributeGrid.store._arrayOfAllItems;
     var dataItemToSelect = null;
     for (var i= 0;i<gridItems.length;i++){
         //weird case that the length doesn't update
@@ -377,57 +387,62 @@ MyFeatureLayer.prototype.selectFeature = function(feat) {
         }
     }
 //    select takes either an object or an index
-    app.layers[app.currentLayer].attributeGrid.selection.select(dataItemToSelect);
-    var delSrc = app.layers[app.currentLayer].deleteButton.src;
-    app.layers[app.currentLayer].deleteButton.src = delSrc.replace('_off','_on');
+    thisObj.attributeGrid.selection.select(dataItemToSelect);
+    var delSrc = thisObj.deleteButton.src;
+    thisObj.deleteButton.src = delSrc.replace('_off','_on');
 };
 
 //On map unselect, unselect the grid row
 MyFeatureLayer.prototype.unselectFeature = function(feat){
+    var thisObj = feat.feature.layer.parentCustomObject;
     //Clear grid selection
-    app.layers[app.currentLayer].attributeGrid.selection.clear();
-    var delSrc = app.layers[app.currentLayer].deleteButton.src;
-    app.layers[app.currentLayer].deleteButton.src = delSrc.replace('_on','_off');
+    thisObj.attributeGrid.selection.clear();
+    var delSrc = thisObj.deleteButton.src;
+    thisObj.deleteButton.src = delSrc.replace('_on','_off');
 };
 
 //Select vector feature on row click
 MyFeatureLayer.prototype.attributeGridRowClick = function(evt){
-    //Temporarily disable the select and unselect feature listeners
-    app.layers[app.currentLayer].vectorLayer.events.unregister(
-            "featureselected", null,
-            app.layers[app.currentLayer].selectFeature);
-    app.layers[app.currentLayer].vectorLayer.events.unregister(
-            "featureunselected", null,
-            app.layers[app.currentLayer].unselectFeature);
+    var thisObj = this.parentCustomObject;
 
-    app.layers[app.currentLayer].selectControl.unselectAll();
-    var clickedFID = app.layers[app.currentLayer].attributeGrid.getItem(evt.rowIndex).fid[0].toString();
-    var clickedFeature = app.layers[app.currentLayer].vectorLayer.getFeatureByFid(clickedFID);
-    app.layers[app.currentLayer].selectControl.select(clickedFeature);
-    //set delete to on
-    var delSrc = app.layers[app.currentLayer].deleteButton.src;
-    app.layers[app.currentLayer].deleteButton.src = delSrc.replace('_off','_on');
-    //Reregister the featureselected listener
-    app.layers[app.currentLayer].vectorLayer.events.register(
+    //Temporarily disable the select and unselect feature listeners
+    thisObj.vectorLayer.events.unregister(
             "featureselected", null,
-            app.layers[app.currentLayer].selectFeature);
-    app.layers[app.currentLayer].vectorLayer.events.register(
+            thisObj.selectFeature);
+    thisObj.vectorLayer.events.unregister(
             "featureunselected", null,
-            app.layers[app.currentLayer].unselectFeature);
+            thisObj.unselectFeature);
+
+    thisObj.selectControl.unselectAll();
+    var clickedFID = thisObj.attributeGrid.getItem(evt.rowIndex).fid[0].toString();
+    var clickedFeature = thisObj.vectorLayer.getFeatureByFid(clickedFID);
+    thisObj.selectControl.select(clickedFeature);
+    //set delete to on
+    var delSrc = thisObj.deleteButton.src;
+    thisObj.deleteButton.src = delSrc.replace('_off','_on');
+    //Reregister the featureselected listener
+    thisObj.vectorLayer.events.register(
+            "featureselected", null,
+            thisObj.selectFeature);
+    thisObj.vectorLayer.events.register(
+            "featureunselected", null,
+            thisObj.unselectFeature);
 
 };
 
 //zoom to feature on grid double click
 MyFeatureLayer.prototype.attributeGridRowDoubleClick = function(evt){
-    var clickedFID = app.layers[app.currentLayer].attributeGrid.getItem(evt.rowIndex).fid[0].toString();
-    var clickedFeature = app.layers[app.currentLayer].vectorLayer.getFeatureByFid(clickedFID);
+    var thisObj = this.parentCustomObject;
+    var clickedFID = this.getItem(evt.rowIndex).fid[0].toString();
+    var clickedFeature = thisObj.vectorLayer.getFeatureByFid(clickedFID);
     var bounds = clickedFeature.geometry.getBounds();
     map.zoomToExtent(bounds, false);
 };
 
 //Delete Feature on server, map, and grid
 MyFeatureLayer.prototype.deleteFeature = function(){
-    var selectedFeatures = app.layers[app.currentLayer].vectorLayer.selectedFeatures;
+    var thisObj = this;
+    var selectedFeatures = thisObj.vectorLayer.selectedFeatures;
     if (selectedFeatures.length == 0)
         return;
     var selectedFeature = selectedFeatures[0];
@@ -438,8 +453,8 @@ MyFeatureLayer.prototype.deleteFeature = function(){
         data: {"deleteFID":deleteFID},
         success: function (response) {
             if (response.success == 0){
-                app.layers[app.currentLayer].attributeGrid.removeSelectedRows();
-                app.layers[app.currentLayer].selectControl.unselectAll();
+                thisObj.attributeGrid.removeSelectedRows();
+                thisObj.selectControl.unselectAll();
                 selectedFeature.destroy();
             }
             else

@@ -344,6 +344,7 @@ def addfeature():
 
     proj = db_session.query(models.Project).get(session['currentProject']['pid'])
 
+    print currentLayer + geomType
     if currentLayer == 'DWELLING' and geomType == 'POINT':
         newFeature = models.Dwelling_Point(prj=proj, geom=newGeom)
     elif currentLayer == 'DWELLING' and geomType == 'POLYGON':

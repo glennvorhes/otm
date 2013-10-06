@@ -2,6 +2,9 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName, publicExample) {
     this.publicExample = publicExample
     this.olMap = olMap;
 
+    this.geoJsonParser = new OpenLayers.Format.GeoJSON();
+    this.wktParser  = new OpenLayers.Format.WKT();
+
     //Define the layer style and layer
     var vector_style = new OpenLayers.Style({
         'fillColor': '#FF00BF',
@@ -26,14 +29,16 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName, publicExample) {
         'select': vector_style_select
     });
 
+    var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+
     this.extentLayer = new OpenLayers.Layer.Vector('extentLayer', {
         'styleMap': vector_style_map,
-        'renderers': app.renderer
+        'renderers': (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers
     });
 
+    this.extentLayer['parentCustomObject'] = this;
+
     olMap.addLayer(this.extentLayer);
-
-
 
     //All Draw controls are initialized, only those relevant to this layer will be loaded
     this.drawControls = {
@@ -52,7 +57,7 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName, publicExample) {
     if (projectConfig.geom){
         var newFeat = new OpenLayers.Feature.Vector();
         newFeat.fid = '1000000';
-        this.extentGeom = app.geoJsonParser.parseGeometry(projectConfig.geom);
+        this.extentGeom = this.geoJsonParser.parseGeometry(projectConfig.geom);
         newFeat.geometry = this.extentGeom;
         var bounds = this.extentGeom.getBounds();
         map.zoomToExtent(bounds, false);
@@ -109,8 +114,9 @@ ExtentLayer.prototype.deactivateAll = function(){
 //Add the extent feature, check if there is only one, update on server
 ExtentLayer.prototype.addFeature = function(feat){
     var theFeat = feat.feature;
+    var thisObj = theFeat.layer.parentCustomObject;
 
-    if (app.extentLayer.extentLayer.features.length > 1) {
+    if (thisObj.extentLayer.features.length > 1) {
         alert('A project can have only one extent. \nPlease clear the extent or modify the existing.');
         theFeat.destroy();
         return;
@@ -121,13 +127,13 @@ ExtentLayer.prototype.addFeature = function(feat){
 //        return;
 //    }
 //    theFeat.destroy();
-    var wkt = app.wktParser.write(theFeat);
-    var geoJSONObj = JSON.parse(app.geoJsonParser.write(theFeat));
+    var wkt = thisObj.wktParser.write(theFeat);
+    var geoJSONObj = JSON.parse(thisObj.geoJsonParser.write(theFeat));
     var srid = geoJSONObj.crs.properties.name;
 
     var updateExtObj = {"updatetask": 1,
-                    "srid": srid,
-                    "geomWKT": wkt};
+                        "srid": srid,
+                        "geomWKT": wkt};
 
     $.ajax({
         url: $SCRIPT_ROOT + '/map/updateextent',
@@ -135,12 +141,12 @@ ExtentLayer.prototype.addFeature = function(feat){
         data: updateExtObj,
         success: function (response) {
             if (response.code == 1) {
-                projectProperties.geom = response.extGSJN;
+//                projectProperties.geom = response.extGSJN;
                 theFeat.fid = '1000000';
                 theFeat.attributes['fid'] = '1000000';
                 theFeat.state = null;
-                app.extentLayer.extentGeom = theFeat.geometry;
-                app.extentLayer.updateDEM();
+                thisObj.extentGeom = theFeat.geometry;
+                thisObj.updateDEM();
             }
             else {
                 theFeat.destroy();
@@ -169,22 +175,24 @@ ExtentLayer.prototype.modifyFeature = function(feat){
         return;
     var featureBackup = new OpenLayers.Feature.Vector(theFeat.modified.geometry, theFeat.attributes);
 
+    var thisObj = theFeat.layer.parentCustomObject;
+
 
 //    if (theFeat.geometry.getArea() > 1000000 * 1000000){
 //        alert('The selected extent is too large.  Please select a smaller area');
 //        theFeat.destroy();
-//        app.extentLayer.extentLayer.events.unregister(
-//            "featureadded", null, app.extentLayer.addFeature);
+//        thisObj.extentLayer.events.unregister(
+//            "featureadded", null, thisObj.addFeature);
 //        featureBackup.fid = '1000000';
-//        app.extentLayer.extentLayer.addFeatures([featureBackup]);
+//        thisObj.extentLayer.addFeatures([featureBackup]);
 //        console.log(featureBackup.fid);
-//        app.extentLayer.extentLayer.events.register(
-//            "featureadded", null, app.extentLayer.addFeature);
+//        thisObj.extentLayer.events.register(
+//            "featureadded", null, thisObj.addFeature);
 //        return;
 //    }
 
-    var wkt = app.wktParser.write(theFeat);
-    var geoJSONObj = JSON.parse(app.geoJsonParser.write(theFeat));
+    var wkt = thisObj.wktParser.write(theFeat);
+    var geoJSONObj = JSON.parse(thisObj.geoJsonParser.write(theFeat));
     var srid = geoJSONObj.crs.properties.name;
 
     var updateExtObj = {"updatetask": 2,
@@ -197,20 +205,20 @@ ExtentLayer.prototype.modifyFeature = function(feat){
         data: updateExtObj,
         success: function (response) {
             if (response.code == 1) {
-                projectProperties.geom = theFeat.geometry;
+//                projectProperties.geom = theFeat.geometry;
                 theFeat.state = theFeat.modified = null;
-                app.extentLayer.extentGeom = theFeat.geometry;
-                app.extentLayer.updateDEM();
+                thisObj.extentGeom = theFeat.geometry;
+                thisObj.updateDEM();
             }
             else {
                 theFeat.destroy();
-                app.extentLayer.extentLayer.events.unregister(
-                    "featureadded", null, app.extentLayer.addFeature);
+                thisObj.extentLayer.events.unregister(
+                    "featureadded", null, thisObj.addFeature);
                 featureBackup.fid = '1000000';
-                app.extentLayer.extentLayer.addFeatures([featureBackup]);
+                thisObj.extentLayer.addFeatures([featureBackup]);
                 console.log(featureBackup.fid);
-                app.extentLayer.extentLayer.events.register(
-                    "featureadded", null, app.extentLayer.addFeature);
+                thisObj.extentLayer.events.register(
+                    "featureadded", null, thisObj.addFeature);
                 switch (response.code) {
                     case -1:
                         alert("Feature must not have self intersections");
@@ -262,9 +270,9 @@ ExtentLayer.prototype.clearExtent = function(){
         }
     });
 
-    projectProperties.geom = null;
-    app.extentLayer.extentGeom = null;
-    app.extentLayer.updateDEM();
+//    projectProperties.geom = null;
+    this.extentGeom = null;
+    this.updateDEM();
 };
 
 ExtentLayer.prototype.updateDEM = function(){
@@ -286,25 +294,27 @@ ExtentLayer.prototype.updateDEM = function(){
     var geomClone = this.extentGeom.clone();
 
     geomClone.transform(new OpenLayers.Projection("EPSG:3857"), new OpenLayers.Projection("EPSG:4326"));
-    var extentWKT = app.wktParser.extractGeometry(geomClone);
+    var extentWKT = this.wktParser.extractGeometry(geomClone);
+
+    var thisObj = this;
 
     $.ajax({
         url: $SCRIPT_ROOT + '/get_image?base64=1&outsrid=3857&geom=' + extentWKT,
         type: 'GET',
         data: {},
         success: function (response) {
-            app.extentLayer.demImage = new OpenLayers.Layer.Image(
+            thisObj.demImage = new OpenLayers.Layer.Image(
                 'DEM', 'data:image/png;base64,' + response, demBounds, new OpenLayers.Size(1, 1) ,{isBaseLayer:false});
             var demOpacity = parseFloat(dijit.byId('demOpacitySlider').value) / 100;
-            app.extentLayer.demImage.setOpacity(demOpacity);
-            olMap.addLayer(app.extentLayer.demImage);
+            thisObj.demImage.setOpacity(demOpacity);
+            olMap.addLayer(thisObj.demImage);
 
 
 //            var setIndex = 0;
 //            while (olMap.layers[setIndex].isBaseLayer && setIndex < olMap.layers.length){
 //                setIndex++;
 //            }
-            olMap.setLayerZIndex(app.extentLayer.demImage, 0);
+            olMap.setLayerZIndex(thisObj.demImage, 0);
 
             //display the opacity controller
             document.getElementById('demOpacityTitleContainer').style.display = 'inherit';
