@@ -1,6 +1,9 @@
 ﻿function MyFeatureLayer (olMap, myFeatureLayerName,panelTitle,drawTypeArray,dataColumns,color, publicExample) {
     var thisObj = this;
 
+    this.geoJsonParser = new OpenLayers.Format.GeoJSON();
+    this.wktParser  = new OpenLayers.Format.WKT();
+
 
     this.publicExample = publicExample;
     this.myFeatureLayerName = myFeatureLayerName;
@@ -267,6 +270,8 @@ MyFeatureLayer.prototype.addFeature = function(feat) {
     var theFeat = feat.feature;
     var thisObj = theFeat.layer.parentCustomObject;
 
+
+
     var wkt = thisObj.wktParser.write(feat.feature);
     var geoJSONObj = JSON.parse(thisObj.geoJsonParser.write(feat.feature));
     var geomType = geoJSONObj.geometry.type;
@@ -289,6 +294,7 @@ MyFeatureLayer.prototype.addFeature = function(feat) {
                 theFeat.state = null;
 
                 var featProps = response.featureProperties;
+                console.log(response.featureProperties)
                 var newDataItem = {};
                 var dataColumns = thisObj.dataColumns;
                 for (var i=0;i<dataColumns.length;i++){

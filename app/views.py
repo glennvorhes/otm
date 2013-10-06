@@ -27,11 +27,34 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
-@app.route('/terrainmap')
+@app.route('/map/checkgeometry', methods=['POST'])
+def checkGeometry():
+    geomWKT = str(request.form["geomWKT"])
+    srid_raw = str(request.form["srid"])
+    # Just need the SRID number
+    srid = long(srid_raw[srid_raw.find(':')+1:])
+
+    newGeom = WKTElement(geomWKT, srid=srid)
+    # Check the geometry before proceeding
+    # geomSimple =  db_session.scalar(func.is_simple(newGeom))
+    # geomValid =  db_session.scalar(func.is_valid(newGeom))
+    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+
+    currentLayer = str(request.form["currentLayer"]).upper()
+
+    newGeom = WKTElement(geomWKT, srid=srid)
+    # Check the geometry before proceeding
+    # geomSimple =  db_session.scalar(func.is_simple(newGeom))ST_IsValid
+    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+    # geomValid =  db_session.scalar(func.is_valid(newGeom))
+    if not (geomValid):
+        return jsonify(fid=-1,valid=False)
+
+@app.route('/example/terrainmap')
 def terrainMap():
     return render_template('terrainMap.html', title='Terrain Map')
 
-@app.route('/infraexample')
+@app.route('/example/infrastructure')
 def infraExample():
     if 'currentProject' in session.keys():
         del session['currentProject']
@@ -54,9 +77,73 @@ def infraExample():
                            title=props['project_name'],
                            jsonProps=jsonProps)
 
-@app.route('/map/getexamplefeatures')
-def getExampFeat():
+@app.route('/example/getfeatures')
+def exampleGetFeatures():
+    session['maxfid'] = 100
     return exampleFeatures.exampleFeatJSON
+
+@app.route('/example/addfeature', methods=['POST'])
+def exampleAddfeature():
+    maxfid = int(session['maxfid']);
+    maxfid += 1
+    session['maxfid'] = maxfid
+
+    geomWKT = str(request.form["geomWKT"])
+    srid_raw = str(request.form["srid"])
+    # Just need the SRID number
+    srid = long(srid_raw[srid_raw.find(':')+1:])
+    geomType = str(request.form["geomType"]).upper()
+    currentLayer = str(request.form["currentLayer"]).upper()
+
+    newGeom = WKTElement(geomWKT, srid=srid)
+    # Check the geometry before proceeding
+    # geomSimple =  db_session.scalar(func.is_simple(newGeom))ST_IsValid
+    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+    # geomValid =  db_session.scalar(func.is_valid(newGeom))
+    if not (geomValid):
+        return jsonify(fid=-1)
+
+    featureProperties = {}
+
+    print currentLayer + geomType
+    if currentLayer == 'DWELLING' and geomType == 'POINT':
+        featureProperties = {"occupants":3, "fid": maxfid, "owner": None}
+    elif currentLayer == 'DWELLING' and geomType == 'POLYGON':
+        featureProperties = {"occupants":3, "fid": maxfid, "owner": None}
+    elif currentLayer == 'IMPEDANCE' and geomType == 'LINESTRING':
+        featureProperties = {"fid": maxfid, "impedance": None}
+    elif currentLayer == 'IMPEDANCE' and geomType == 'POLYGON':
+        featureProperties = {"fid": maxfid, "impedance": None}
+    elif currentLayer == 'WATER'and geomType == 'POINT':
+        featureProperties = {"fid": maxfid, "description": None, "flow_rate_gpm": None}
+    elif currentLayer == 'TANK' and geomType == 'POLYGON':
+        featureProperties = {"fid": maxfid, "description": None}
+    elif currentLayer == 'TREATMENT' and geomType == 'POLYGON':
+        featureProperties = {"fid": maxfid, "description": None}
+    else:
+        return jsonify(fid=-2)
+
+    return jsonify(fid=featureProperties['fid'], featureProperties=featureProperties)
+
+
+@app.route('/example/editfeaturegeom', methods=['POST'])
+@login_required
+def exampleEditFeatures():
+    geomWKT = str(request.form["geomWKT"])
+    # Just need the SRID number
+    srid_raw = str(request.form["srid"])
+    srid = long(srid_raw[srid_raw.find(':')+1:])
+    featFID = long(request.form["fid"])
+
+    newGeom = WKTElement(geomWKT, srid=srid)
+    # Check the geometry before proceeding
+    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+    # geomSimple = db_session.scalar(func.is_simple(newGeom))
+    # geomValid = db_session.scalar(func.is_valid(newGeom))
+    if not geomValid:
+        return jsonify(fid=-1)
+    else:
+        return jsonify(fid=featFID)
 
 
 @app.route('/get_image')
@@ -194,8 +281,6 @@ def about():
 @app.route('/contact')
 def contact():
     return render_template('contact.html', title='Open Terrain Map - Contact')
-
-
 
 @app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
@@ -399,28 +484,7 @@ def editfeaturegeom():
     db_session.commit()
     return jsonify(fid=featFID)
 
-@app.route('/map/checkgeometry', methods=['POST'])
-def checkGeometry():
-    geomWKT = str(request.form["geomWKT"])
-    srid_raw = str(request.form["srid"])
-    # Just need the SRID number
-    srid = long(srid_raw[srid_raw.find(':')+1:])
 
-    newGeom = WKTElement(geomWKT, srid=srid)
-    # Check the geometry before proceeding
-    # geomSimple =  db_session.scalar(func.is_simple(newGeom))
-    # geomValid =  db_session.scalar(func.is_valid(newGeom))
-    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
-
-    currentLayer = str(request.form["currentLayer"]).upper()
-
-    newGeom = WKTElement(geomWKT, srid=srid)
-    # Check the geometry before proceeding
-    # geomSimple =  db_session.scalar(func.is_simple(newGeom))ST_IsValid
-    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
-    # geomValid =  db_session.scalar(func.is_valid(newGeom))
-    if not (geomValid):
-        return jsonify(fid=-1,valid=False)
 
 
     #
