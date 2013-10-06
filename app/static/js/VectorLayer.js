@@ -282,8 +282,12 @@ MyFeatureLayer.prototype.addFeature = function(feat) {
                         "geomWKT": wkt,
                         "currentLayer": thisObj.myFeatureLayerName};
 
+    var addFeatureURL = (thisObj.publicExample ?
+        $SCRIPT_ROOT + '/example/addfeature':
+        $SCRIPT_ROOT + '/map/addfeature')
+
     $.ajax({
-        url: $SCRIPT_ROOT + '/map/addfeature',
+        url: addFeatureURL,
         type: 'POST',
         data: newFeatureData,
         success: function (response) {
@@ -337,8 +341,13 @@ MyFeatureLayer.prototype.modifyFeature = function(feat) {
                         "fid": theFeat.fid,
                         "geomWKT": wkt};
 
+
+    var modifyFeatureURL = (thisObj.publicExample ?
+    $SCRIPT_ROOT + '/example/editfeaturegeom':
+    $SCRIPT_ROOT + '/map/editfeaturegeom')
+
     $.ajax({
-        url: $SCRIPT_ROOT + '/map/editfeaturegeom',
+        url: modifyFeatureURL,
         type: 'POST',
         data: modifyFeatureData,
         success: function (response) {
@@ -453,22 +462,30 @@ MyFeatureLayer.prototype.deleteFeature = function(){
         return;
     var selectedFeature = selectedFeatures[0];
     var deleteFID = parseInt(selectedFeature.fid);
-    $.ajax({
-        url: $SCRIPT_ROOT + '/map/deletefeature',
-        type: 'POST',
-        data: {"deleteFID":deleteFID},
-        success: function (response) {
-            if (response.success == 0){
-                thisObj.attributeGrid.removeSelectedRows();
-                thisObj.selectControl.unselectAll();
-                selectedFeature.destroy();
+
+    if (this.publicExample){
+        thisObj.attributeGrid.removeSelectedRows();
+        thisObj.selectControl.unselectAll();
+        selectedFeature.destroy();
+    }
+    else{
+        $.ajax({
+            url: $SCRIPT_ROOT + '/map/deletefeature',
+            type: 'POST',
+            data: {"deleteFID":deleteFID},
+            success: function (response) {
+                if (response.success == 0){
+                    thisObj.attributeGrid.removeSelectedRows();
+                    thisObj.selectControl.unselectAll();
+                    selectedFeature.destroy();
+                }
+                else
+                    console.log('Something wrong');
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
             }
-            else
-                console.log('Something wrong');
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status);
-            alert(thrownError);
-        }
-    });
+        });
+    }
 };

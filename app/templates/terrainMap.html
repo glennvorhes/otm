@@ -12,7 +12,7 @@
         <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js') }}"></script>
         <script src="{{ url_for('static', filename='js/jquery-ui-1.10.3.min.js') }}"></script>
         <script src='{{url_for('static', filename='js/OpenLayers.js')}}'></script>
-        <script src="{{ url_for('static', filename='js/homePageMaps.js') }}"></script>
+        <script src='{{url_for('static', filename='js/ExtentLayer.js')}}'></script>
         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
         <style type="text/css">
@@ -28,29 +28,68 @@
         </style>
         <script>
             $SCRIPT_ROOT={{ request.script_root|tojson|safe }};
+
+            require(["dijit/Dialog", "dijit/form/TextBox", "dijit/form/Button",
+                "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+                "dijit/TitlePane", "dijit/form/HorizontalSlider"]);
+
+            var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+            var map;
+
+            dojo.ready(function () {
+                var mapDiv = 'map_element';
+
+                var zoomlevels = 20;
+                map = new OpenLayers.Map(mapDiv,
+                {
+                        allOverlays: false,
+                        controls: [
+                                    new OpenLayers.Control.Navigation({dragPanOptions: {enableKinetic: true}}),
+                                    new OpenLayers.Control.PanZoomBar({}),
+                                    new OpenLayers.Control.LayerSwitcher({})
+                                ],
+                        projection: new OpenLayers.Projection("EPSG:3857"),
+                        numZoomLevels: zoomlevels,
+                        zoom:2
+                });
+
+                map.addLayers([
+                new OpenLayers.Layer.Google("Hybrid",
+                { type: google.maps.MapTypeId.HYBRID, numZoomLevels: zoomlevels}),
+                new OpenLayers.Layer.Google("Streets",
+                { numZoomLevels: zoomlevels }),
+                new OpenLayers.Layer.Google("Satellite",
+                { type: google.maps.MapTypeId.SATELLITE, numZoomLevels: zoomlevels}),
+                new OpenLayers.Layer.Google("Physical",
+                { type: google.maps.MapTypeId.TERRAIN, numZoomLevels: zoomlevels }
+                )]);
+
+                map.zoomToMaxExtent();
+                new ExtentLayer(map, {}, 'set_extent_radio',true, 'demOpacitySlider');
+            });
         </script>
     </head>
     <body class='soria'>
         <div data-dojo-type="dijit/layout/BorderContainer"
             data-dojo-props="design:'sidebar', gutters:true, liveSplitters:true" id="borderContainer">
-            <div id='terrainMapDiv' data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+            <div id='map_element' data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
                 <div style="position: absolute; top: 10px; left: 53px; z-index: 999;">
                     <input type="radio" id="DONE_set_extent_radio" name="set_extent_radio" checked="checked"
-                    onchange='app.extentLayer.radioChanged();' style='display: none;'/>
+                    style='display: none;'/>
                     <label for="DONE_set_extent_radio">
                         <img src="{{ url_for('static', filename='img/icons/DONE_on.png') }}"
                                 alt="Set Extent Done" title='Deactivate Extent Tools'
                                 id='DONE_set_extent_radio_imgLabel' style='margin: 3px;'>
                     </label>
                     <input type="radio" id="POLYGON_set_extent_radio" name="set_extent_radio"
-                            onchange='app.extentLayer.radioChanged();' style='display: none;'/>
+                            style='display: none;'/>
                     <label for="POLYGON_set_extent_radio">
                         <img src="{{ url_for('static', filename='img/icons/POLYGON_off.png') }}"
                                 alt="Set Extent"  title='Draw Extent Feature'
                                 id='POLYGON_set_extent_radio_imgLabel' style='margin: 3px;'>
                     </label>
                     <input type="radio" id="MODIFY_set_extent_radio" name="set_extent_radio"
-                            onchange='app.extentLayer.radioChanged();' style='display: none;'/>
+                            style='display: none;'/>
                     <label for="MODIFY_set_extent_radio">
                         <img src="{{ url_for('static', filename='img/icons/MODIFY_off.png') }}"
                                 alt="Set Extent" title='Modify existing extent'
@@ -58,7 +97,7 @@
                     </label>
                     <img src="{{ url_for('static', filename='img/icons/DELETE_on.png') }}"
                         alt="Del Extent" title='Clear extent' style='margin: 3px;'
-                            onclick="app.extentLayer.clearExtent();">
+                            id="CLEAR_set_extent_radio">
                 </div>
                 <div id='demOpacityTitleContainer' style="position: absolute; left:210px; top:10px; z-index:999; width:200px;">
                     <div id='demOpacityTitle' data-dojo-type="dijit/TitlePane"
@@ -70,7 +109,6 @@
                                     style="width:160px;"
                                     data-dojo-type="dijit/form/HorizontalSlider"
                                     data-dojo-props='value:50, minimum: 0, maximum:100,
-                                    onChange:function(val){ if (!app.extentLayer.demImage) {return;} app.extentLayer.demImage.setOpacity(val / 100); },
                                     showButtons:true,
                                     intermediateChanges:false,
                                     discreteValues: 5,

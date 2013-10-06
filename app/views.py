@@ -27,29 +27,6 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
-@app.route('/map/checkgeometry', methods=['POST'])
-def checkGeometry():
-    geomWKT = str(request.form["geomWKT"])
-    srid_raw = str(request.form["srid"])
-    # Just need the SRID number
-    srid = long(srid_raw[srid_raw.find(':')+1:])
-
-    newGeom = WKTElement(geomWKT, srid=srid)
-    # Check the geometry before proceeding
-    # geomSimple =  db_session.scalar(func.is_simple(newGeom))
-    # geomValid =  db_session.scalar(func.is_valid(newGeom))
-    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
-
-    currentLayer = str(request.form["currentLayer"]).upper()
-
-    newGeom = WKTElement(geomWKT, srid=srid)
-    # Check the geometry before proceeding
-    # geomSimple =  db_session.scalar(func.is_simple(newGeom))ST_IsValid
-    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
-    # geomValid =  db_session.scalar(func.is_valid(newGeom))
-    if not (geomValid):
-        return jsonify(fid=-1,valid=False)
-
 @app.route('/example/terrainmap')
 def terrainMap():
     return render_template('terrainMap.html', title='Terrain Map')
@@ -127,7 +104,6 @@ def exampleAddfeature():
 
 
 @app.route('/example/editfeaturegeom', methods=['POST'])
-@login_required
 def exampleEditFeatures():
     geomWKT = str(request.form["geomWKT"])
     # Just need the SRID number
@@ -145,11 +121,35 @@ def exampleEditFeatures():
     else:
         return jsonify(fid=featFID)
 
+@app.route('/example/updateextent', methods=['POST'])
+def exampleUpdateExtent():
+    # Task ids add: 1, modify:2, clear:3
+    updateTask = int(request.form["updatetask"])
+    if updateTask == 1 or updateTask == 2:
+        geomWKT = str(request.form["geomWKT"])
+        srid_raw = str(request.form["srid"])
+        # Just need the SRID number
+        srid = long(srid_raw[srid_raw.find(':')+1:])
+
+        newGeom = WKTElement(geomWKT, srid=srid)
+        # Check the geometry before proceeding
+        # geomSimple =  db_session.scalar(func.is_simple(newGeom))
+        # geomValid =  db_session.scalar(func.is_valid(newGeom))
+        geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+
+        if not geomValid:
+            return jsonify(code=-1)
+        return jsonify(code=1)
+
+    elif updateTask == 3:
+        return jsonify(code=1)
+    else:
+        return jsonify(code=-2)
+
 
 @app.route('/get_image')
 def get_image():
     hasError = False
-
     outSrid = request.args.get('outsrid', '4236')
 
     try:
@@ -166,7 +166,6 @@ def get_image():
         return 'error'
 
     getBase64 = request.args.get('base64', '')
-
     conn = psycopg2.connect(ConnStringDEM_DB)
     cur = conn.cursor()
 
@@ -484,42 +483,6 @@ def editfeaturegeom():
     db_session.commit()
     return jsonify(fid=featFID)
 
-
-
-
-    #
-    #
-    #
-    #     currentLayer = str(request.form["currentLayer"]).upper()
-    # if 'currentLayer'
-    #
-    #
-    # if currentLayer == 'DWELLING' and geomType == 'POINT':
-    #     newFeature = models.Dwelling_Point(prj=proj, geom=newGeom)
-    # elif currentLayer == 'DWELLING' and geomType == 'POLYGON':
-    #     newFeature = models.Dwelling_Polygon(prj=proj, geom=newGeom)
-    # elif currentLayer == 'IMPEDANCE' and geomType == 'LINESTRING':
-    #     newFeature = models.Impedance_LineString(prj=proj, geom=newGeom)
-    # elif currentLayer == 'IMPEDANCE' and geomType == 'POLYGON':
-    #     newFeature = models.Impedance_Polygon(prj=proj, geom=newGeom)
-    # elif currentLayer == 'WATER'and geomType == 'POINT':
-    #     newFeature = models.Water_Source(prj=proj, geom=newGeom)
-    # elif currentLayer == 'TANK' and geomType == 'POLYGON':
-    #     newFeature = models.Tank_Site(prj=proj, geom=newGeom)
-    # elif currentLayer == 'TREATMENT' and geomType == 'POLYGON':
-    #     newFeature = models.Treatment_Site(prj=proj, geom=newGeom)
-    # else:
-    #     return jsonify(fid=-2)
-    #
-    #
-    #
-
-
-    if geomValid:
-        return jsonify(valid=True)
-    else:
-        return jsonify(valid=False)
-
 @app.route('/map/updateextent', methods=['POST'])
 @login_required
 def updateextent():
@@ -538,22 +501,22 @@ def updateextent():
         geomValid = db_session.scalar(func.ST_IsValid(newGeom))
 
         if not geomValid:
-            return jsonify(code=-1, extGSJN=None)
+            return jsonify(code=-1)
 
         proj = db_session.query(models.Project).get(session['currentProject']['pid'])
 
         proj.geom = newGeom
         db_session.commit()
-        extentGeojson = db_session.scalar(func.ST_AsGeoJSON(newGeom))
-        return jsonify(code=1, extGSJN=extentGeojson)
+        # extentGeojson = db_session.scalar(func.ST_AsGeoJSON(newGeom))
+        return jsonify(code=1)
 
     elif updateTask == 3:
         proj = db_session.query(models.Project).get(session['currentProject']['pid'])
         proj.geom = None
         db_session.commit()
-        return jsonify(code=1, extGSJN=None)
+        return jsonify(code=1)
     else:
-        return jsonify(code=-2, extGSJN=None)
+        return jsonify(code=-2)
 
 @app.route('/map/deletefeature', methods=['POST'])
 @login_required

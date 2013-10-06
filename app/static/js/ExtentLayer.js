@@ -1,5 +1,12 @@
-function ExtentLayer(olMap, projectConfig, radioButtonTagName, publicExample) {
-    this.publicExample = publicExample
+function ExtentLayer(olMap, projectConfig, radioButtonTagName, publicExample, opacitySliderId, opacityTitlePaneId) {
+
+
+    this.opacityTitlePaneId = opacityTitlePaneId;
+    this.opacitySlider = opacitySliderId;
+    this.updateExtentURL = (publicExample ?
+        $SCRIPT_ROOT + '/example/updateextent':
+        $SCRIPT_ROOT + '/map/updateextent')
+
     this.olMap = olMap;
 
     this.geoJsonParser = new OpenLayers.Format.GeoJSON();
@@ -50,6 +57,23 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName, publicExample) {
     olMap.addControls([this.drawControls.POLYGON,this.drawControls.MODIFY]);
 
     this.extentRadioButtons = document.getElementsByName(radioButtonTagName);
+
+    var thisObj = this;
+    for (var i = 0; i < this.extentRadioButtons.length; i++){
+        this.extentRadioButtons[i].onchange = function(evt){thisObj.radioChanged();};
+    }
+
+    document.getElementById('CLEAR_' + radioButtonTagName).onclick =
+        function(evt){thisObj.clearExtent();};
+
+    dijit.byId(opacitySliderId).onChange = function(val){
+        if (!thisObj.demImage){
+            return;
+        }
+        else{
+            thisObj.demImage.setOpacity(val / 100);
+        }
+    };
 
     this.deactivateAll();
 
@@ -136,7 +160,7 @@ ExtentLayer.prototype.addFeature = function(feat){
                         "geomWKT": wkt};
 
     $.ajax({
-        url: $SCRIPT_ROOT + '/map/updateextent',
+        url: thisObj.updateExtentURL,
         type: 'POST',
         data: updateExtObj,
         success: function (response) {
@@ -200,7 +224,7 @@ ExtentLayer.prototype.modifyFeature = function(feat){
                     "geomWKT": wkt};
 
     $.ajax({
-        url: $SCRIPT_ROOT + '/map/updateextent',
+        url: thisObj.updateExtentURL,
         type: 'POST',
         data: updateExtObj,
         success: function (response) {
@@ -244,11 +268,13 @@ ExtentLayer.prototype.clearExtent = function(){
         return;
     }
 
+    var thisObj = this;
+
     while (this.extentLayer.features.length > 0)
             this.extentLayer.features[0].destroy();
     //update on server
     $.ajax({
-        url: $SCRIPT_ROOT + '/map/updateextent',
+        url: thisObj.updateExtentURL,
         type: 'POST',
         data: {"updatetask": 3},
         success: function (response) {
@@ -278,7 +304,8 @@ ExtentLayer.prototype.clearExtent = function(){
 ExtentLayer.prototype.updateDEM = function(){
     var olMap = this.olMap;
     //hide the opacity slider
-    document.getElementById('demOpacityTitleContainer').style.display = 'none';
+    if (this.opacityTitlePaneId)
+        document.getElementById(this.opacityTitlePaneId).style.display = 'none';
     if (this.demImage) {
         olMap.removeLayer(this.demImage);
         this.demImage.destroy();
@@ -305,19 +332,16 @@ ExtentLayer.prototype.updateDEM = function(){
         success: function (response) {
             thisObj.demImage = new OpenLayers.Layer.Image(
                 'DEM', 'data:image/png;base64,' + response, demBounds, new OpenLayers.Size(1, 1) ,{isBaseLayer:false});
-            var demOpacity = parseFloat(dijit.byId('demOpacitySlider').value) / 100;
+            var demOpacity = parseFloat(dijit.byId(thisObj.opacitySlider).value) / 100;
             thisObj.demImage.setOpacity(demOpacity);
             olMap.addLayer(thisObj.demImage);
 
-
-//            var setIndex = 0;
-//            while (olMap.layers[setIndex].isBaseLayer && setIndex < olMap.layers.length){
-//                setIndex++;
-//            }
             olMap.setLayerZIndex(thisObj.demImage, 0);
 
             //display the opacity controller
-            document.getElementById('demOpacityTitleContainer').style.display = 'inherit';
+            if (thisObj.opacityTitlePaneId)
+                document.getElementById(thisObj.opacityTitlePaneId).style.display = 'inherit';
+
         },
         error: function (xhr, ajaxOptions, thrownError) {
             alert(xhr.status);

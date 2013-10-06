@@ -38,10 +38,10 @@
                      <a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a>
                  </div>
             </div>
-            <a href='#' id='aShowInfraMapDialogHeader'><h2>Terrain Based Applications</h2></a>
+            <a href='{{ url_for('infraExample') }}'><h2>Terrain Based Applications</h2></a>
             <div class="text">
-                <a href='#' id='aShowInfraMapDialog'><img src="{{ url_for('static', filename='img/lyout/img2.jpg') }}"
-                     width="152" height="102" class="imgFloat" alt="" /></a>
+                <a href='{{ url_for('infraExample') }}'><img src="{{ url_for('static', filename='img/infraMapImg.png') }}"
+                     width="202" height="150" class="imgFloat" alt="" /></a>
                 <span>
                     Preliminary infrastructure design is possible with the digital terrain map maintained by
                     Open Terrain Map.  The first design generation algorithms are being built for gravity fed

@@ -156,14 +156,15 @@ dojo.ready(function () {
     //addDemHillshade(projectProperties.pid, map);
 
     //Add the extent layer feature if it exists for the project
-    app['extentLayer'] = new ExtentLayer(map, projectProperties, 'set_extent_radio', projectProperties.publicExample);
+    app['extentLayer'] = new ExtentLayer(map, projectProperties, 'set_extent_radio',
+        projectProperties.publicExample, 'demOpacitySlider', 'demOpacityTitleContainer');
 
     //Add layers and dojo panels specific to the project Type, Water Supply or Sewerage
     setupProject(projectProperties.publicExample);
 
     var getFeaturesURL;
     if (projectProperties.publicExample){
-        getFeaturesURL =  $SCRIPT_ROOT + '/map/getexamplefeatures?' + rand1 + '=' + rand2;
+        getFeaturesURL =  $SCRIPT_ROOT + '/example/getfeatures?' + rand1 + '=' + rand2;
     }
     else{
         /*Cache buster, ensures features are loaded from server and not browser cache
