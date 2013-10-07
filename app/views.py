@@ -13,6 +13,7 @@ import base64
 import exampleFeatures
 import os
 import uuid
+import io
 
 
 @app.route('/testurl')
@@ -194,11 +195,11 @@ def getDem():
         ST_AsPNG(\
             ST_Transform(\
                 ST_Clip(\
-                    ST_Union(rast),ST_GeomFromText('{0}', 4326), true)\
-                ,{1})\
+                    ST_Union(rast),ST_GeomFromText('{0}', {1}), true)\
+                ,{2})\
             )\
         FROM aster_gdem \
-        WHERE ST_Intersects(rast, ST_GeomFromText('{0}', 4326));".format(geomWKT, outSrid)
+        WHERE ST_Intersects(rast, ST_GeomFromText('{0}', {1}));".format(geomWKT, inSrid, outSrid)
 
     cur.execute(query)
     buffer = cur.fetchone()[0]
@@ -208,12 +209,57 @@ def getDem():
     if outFormat == 'base64png':
         return base64.b64encode(buffer)
     elif outFormat == 'zip':
-        uniqueTempDirectory = os.path.join(tempZipDir, str(uuid.uuid1()))
-        os.makedirs(uniqueTempDirectory)
-        tempFolder = os.path.join(uniqueTempDirectory, 'demDownload')
-        os.makedirs(tempFolder)
-
-        return 'not yet implemented' + tempFolder + str(buffer)
+        # uniqueTempDirectory = os.path.join(tempZipDir, str(uuid.uuid1()))
+        # os.makedirs(uniqueTempDirectory)
+        # tempFolder = os.path.join(uniqueTempDirectory, 'demDownload')
+        # os.makedirs(tempFolder)
+        #
+        # conn = psycopg2.connect(ConnStringDEM_DB)
+        # cur = conn.cursor()
+        #
+        # query = "SELECT \
+        #     ST_MetaData(\
+        #         ST_Transform(\
+        #             ST_Clip(\
+        #                 ST_Union(rast),ST_GeomFromText('{0}', {1}), true)\
+        #             ,{2})\
+        #         )\
+        #     FROM aster_gdem \
+        #     WHERE ST_Intersects(rast, ST_GeomFromText('{0}', {1}));".format(geomWKT, inSrid, outSrid)
+        #
+        # cur.execute(query)
+        # metaString = cur.fetchone()[0]
+        #
+        # metaString = metaString.replace('(', '').replace(')', '')
+        # metaList = metaString.split(',')
+        #
+        # query = 'select srtext from spatial_ref_sys where auth_srid = {0}'.format(metaList[8])
+        # cur.execute(query)
+        # projString = cur.fetchone()[0]
+        # conn.close()
+        #
+        # projString = projString.replace('"', '&quot')
+        #
+        #
+        # aux_xml = '''
+        # <PAMDataset>
+        #   <SRS>{0}</SRS>
+        #   <GeoTransform> {1},  {2},  {3},  {4},  {5}, {6}</GeoTransform>
+        #   <Metadata domain="IMAGE_STRUCTURE">
+        #     <MDI key="INTERLEAVE">PIXEL</MDI>
+        #   </Metadata>
+        # </PAMDataset>
+        # '''.format(projString, metaList[0], metaList[4], metaList[6], metaList[1], metaList[7], metaList[5])
+        #
+        #
+        # with io.open(os.path.join(tempFolder, 'dem.png'), 'wb') as file:
+        #     file.write(str(buffer))
+        #
+        # with io.open(os.path.join(tempFolder, 'dem.png.aux.xml'), 'wb') as file:
+        #     file.write(str(aux_xml))
+        #
+        # return 'not yet implemented' + tempFolder + metaString + str(len(metaList)) + projString
+        return 'not yet implemented'
     else:
         response = make_response(str(buffer))
         response.headers['Content-Type'] = 'image/png'
