@@ -74,7 +74,6 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName, publicExample, op
             thisObj.demImage.setOpacity(val / 100);
         }
     };
-
     this.deactivateAll();
 
     //if extent has been set
