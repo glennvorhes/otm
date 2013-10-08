@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, make_response
+from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, make_response, send_file, send_from_directory
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db_session, lm, oid, models, tempZipDir
 import forms
@@ -14,6 +14,11 @@ import exampleFeatures
 import os
 import uuid
 import io
+import zipfile
+import shutil
+
+
+
 
 
 @app.route('/testurl')
@@ -209,38 +214,61 @@ def getDem():
     if outFormat == 'base64png':
         return base64.b64encode(buffer)
     elif outFormat == 'zip':
-        # uniqueTempDirectory = os.path.join(tempZipDir, str(uuid.uuid1()))
-        # os.makedirs(uniqueTempDirectory)
-        # tempFolder = os.path.join(uniqueTempDirectory, 'demDownload')
-        # os.makedirs(tempFolder)
-        #
-        # conn = psycopg2.connect(ConnStringDEM_DB)
-        # cur = conn.cursor()
-        #
-        # query = "SELECT \
-        #     ST_MetaData(\
-        #         ST_Transform(\
-        #             ST_Clip(\
-        #                 ST_Union(rast),ST_GeomFromText('{0}', {1}), true)\
-        #             ,{2})\
-        #         )\
-        #     FROM aster_gdem \
-        #     WHERE ST_Intersects(rast, ST_GeomFromText('{0}', {1}));".format(geomWKT, inSrid, outSrid)
-        #
-        # cur.execute(query)
-        # metaString = cur.fetchone()[0]
-        #
-        # metaString = metaString.replace('(', '').replace(')', '')
-        # metaList = metaString.split(',')
-        #
-        # query = 'select srtext from spatial_ref_sys where auth_srid = {0}'.format(metaList[8])
-        # cur.execute(query)
-        # projString = cur.fetchone()[0]
-        # conn.close()
-        #
+        # if not outSrid == 4326:
+        #     return 'only implemented for output srid 4326'
+
+        uniqueTempDirectory = os.path.join(tempZipDir, str(uuid.uuid1()))
+        os.makedirs(uniqueTempDirectory)
+        tempFolder = os.path.join(uniqueTempDirectory, 'demDownload')
+        os.makedirs(tempFolder)
+
+        conn = psycopg2.connect(ConnStringDEM_DB)
+        cur = conn.cursor()
+
+        query = "SELECT \
+            ST_MetaData(\
+                ST_Transform(\
+                    ST_Clip(\
+                        ST_Union(rast),ST_GeomFromText('{0}', {1}), true)\
+                    ,{2})\
+                )\
+            FROM aster_gdem \
+            WHERE ST_Intersects(rast, ST_GeomFromText('{0}', {1}));".format(geomWKT, inSrid, outSrid)
+
+        cur.execute(query)
+        metaString = cur.fetchone()[0]
+
+        metaString = metaString.replace('(', '').replace(')', '')
+        metaList = metaString.split(',')
+
+        query = 'select srtext from spatial_ref_sys where auth_srid = {0}'.format(metaList[8])
+        cur.execute(query)
+        projString = cur.fetchone()[0]
+        conn.close()
+
+
+        # print projString
         # projString = projString.replace('"', '&quot')
+
+        # aux_xml = '''
+        # <PAMDataset>
+        #   <SRS>GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],PRIMEM[&quot;Greenwich&quot;,0],UNIT[&quot;degree&quot;,0.0174532925199433],AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]</SRS>
+        #     <GeoTransform> -6.8000138888888884e+01,  2.7777777777777778e-04,  0.0000000000000000e+00,  1.9000138888888888e+01,  0.0000000000000000e+00, -2.7777777777777778e-04</GeoTransform>
+        #   <Metadata domain="IMAGE_STRUCTURE">
+        #     <MDI key="INTERLEAVE">PIXEL</MDI>
+        #   </Metadata>
+        # </PAMDataset>
         #
-        #
+
+        aux_xml = '<PAMDataset><SRS>{0}</SRS>\
+<GeoTransform>{1:E},  {2:E},  {3:E},  {4:E},  {5:E}, {6:E}</GeoTransform>\
+<Metadata domain="IMAGE_STRUCTURE"><MDI key="INTERLEAVE">PIXEL</MDI></Metadata>\
+</PAMDataset>'.format(projString, float(metaList[0]), float(metaList[4]), float(metaList[6]),
+                      float(metaList[1]), float(metaList[7]), float(metaList[5]))
+
+
+# print '{0:E} {1:E}'.format(1234567890, 1341234)
+        # print '{:E} {:E}'.format(1234567890, 1341234)
         # aux_xml = '''
         # <PAMDataset>
         #   <SRS>{0}</SRS>
@@ -250,16 +278,31 @@ def getDem():
         #   </Metadata>
         # </PAMDataset>
         # '''.format(projString, metaList[0], metaList[4], metaList[6], metaList[1], metaList[7], metaList[5])
-        #
-        #
-        # with io.open(os.path.join(tempFolder, 'dem.png'), 'wb') as file:
-        #     file.write(str(buffer))
-        #
-        # with io.open(os.path.join(tempFolder, 'dem.png.aux.xml'), 'wb') as file:
-        #     file.write(str(aux_xml))
-        #
-        # return 'not yet implemented' + tempFolder + metaString + str(len(metaList)) + projString
-        return 'not yet implemented'
+
+
+        with io.open(os.path.join(tempFolder, 'dem.png'), 'wb') as file:
+            file.write(str(buffer))
+
+        with io.open(os.path.join(tempFolder, 'dem.png.aux.xml'), 'wb') as file:
+            file.write(str(aux_xml))
+
+
+        zipFileOut = os.path.join(uniqueTempDirectory, 'demDownload')
+        shutil.make_archive(zipFileOut, format="zip", root_dir=tempFolder)
+        zipFileOut += '.zip'
+
+        # return send_from_directory(zipFileOut, "demDownload.zip")
+        return send_file(zipFileOut, mimetype='application/zip', as_attachment='demDownload.zip')
+
+
+        # zipFilePath = os.path.join(uniqueTempDirectory, 'demDownload.zip')
+        # zip = zipfile.ZipFile(zipFilePath, 'w', zipfile.ZIP_DEFLATED)
+        # for file in os.listdir(tempFolder):
+        #     zip.write(os.path.join(tempFolder, file))
+        # zip.close()
+
+        # return aux_xml
+        # return 'not yet implemented'
     else:
         response = make_response(str(buffer))
         response.headers['Content-Type'] = 'image/png'

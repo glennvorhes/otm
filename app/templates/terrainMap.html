@@ -28,6 +28,7 @@
         </style>
         <script>
             $SCRIPT_ROOT={{ request.script_root|tojson|safe }};
+            var extentLayer;
 
             require(["dijit/Dialog", "dijit/form/TextBox", "dijit/form/Button",
                 "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
@@ -65,8 +66,27 @@
                 )]);
 
                 map.zoomToMaxExtent();
-                new ExtentLayer(map, {}, 'set_extent_radio',true, 'demOpacitySlider');
+                extentLayer = new ExtentLayer(map, {}, 'set_extent_radio',true, 'demOpacitySlider');
+
+                document.getElementById('downloadDem').onclick = downloadDemFunction;
             });
+
+            function downloadDemFunction(){
+                if (!extentLayer.extentGeom){
+                    alert('Select a geometry first');
+                    return
+                }
+                var geomClone = extentLayer.extentGeom.clone();
+
+                geomClone.transform(new OpenLayers.Projection("EPSG:3857"), new OpenLayers.Projection("EPSG:4326"));
+                var extentWKT = extentLayer.wktParser.extractGeometry(geomClone);
+                var outputSRID = document.getElementById('sridSelect').value;
+
+                var demDownloadUrl = $SCRIPT_ROOT + '/getdem?outformat=zip&insrid=4326&outsrid=' + outputSRID;
+                demDownloadUrl += '&geom=' + extentWKT;
+
+                window.open(demDownloadUrl, '_blank');
+            }
         </script>
     </head>
     <body class='soria'>
@@ -124,6 +144,19 @@
                                 </div>
                             </div>
                             <span style="color: gray;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set Opacity</span>
+                        </div>
+                    </div>
+                </div>
+                <div id='demDownloadContainer' style="position: absolute; left:430px; top:10px; z-index:999; width:160px;">
+                    <div id='demDownloadTitle' data-dojo-type="dijit/TitlePane"
+                        data-dojo-props="title:'Download', closable:false, open:false, region:'center'"
+                        onMouseLeave="var demDown = dijit.byId('demDownloadTitle'); if (demDown.open) demDown.toggle()">
+                        <label>Output SRID</label><br/>
+                        <select id='sridSelect'>
+                            <option value="4326" selected='selected'>EPSG 4326</option>
+                            <option value="3857" selected='selected'>EPSG 3857</option>
+                        </select><br/>
+                        <input id='downloadDem' type="button" value="Download" style="margin: 5px;"/>
                         </div>
                     </div>
                 </div>
