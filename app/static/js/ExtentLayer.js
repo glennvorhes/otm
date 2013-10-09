@@ -144,12 +144,12 @@ ExtentLayer.prototype.addFeature = function(feat){
         theFeat.destroy();
         return;
     }
-//    if (theFeat.geometry.getArea() > 2 * 32534032){
-//        alert('The selected extent is too large.  Please select a smaller area');
-//        theFeat.destroy();
-//        return;
-//    }
-//    theFeat.destroy();
+    if (theFeat.geometry.getArea() > 246952910){
+        alert('The selected extent is too large.  Please select a smaller area');
+        theFeat.destroy();
+        return;
+    }
+
     var wkt = thisObj.wktParser.write(theFeat);
     var geoJSONObj = JSON.parse(thisObj.geoJsonParser.write(theFeat));
     var srid = geoJSONObj.crs.properties.name;
@@ -201,18 +201,17 @@ ExtentLayer.prototype.modifyFeature = function(feat){
     var thisObj = theFeat.layer.parentCustomObject;
 
 
-//    if (theFeat.geometry.getArea() > 1000000 * 1000000){
-//        alert('The selected extent is too large.  Please select a smaller area');
-//        theFeat.destroy();
-//        thisObj.extentLayer.events.unregister(
-//            "featureadded", null, thisObj.addFeature);
-//        featureBackup.fid = '1000000';
-//        thisObj.extentLayer.addFeatures([featureBackup]);
-//        console.log(featureBackup.fid);
-//        thisObj.extentLayer.events.register(
-//            "featureadded", null, thisObj.addFeature);
-//        return;
-//    }
+    if (theFeat.geometry.getArea() > 246952910){
+        alert('The selected extent is too large.  Please select a smaller area');
+        theFeat.destroy();
+        thisObj.extentLayer.events.unregister(
+            "featureadded", null, thisObj.addFeature);
+        featureBackup.fid = '1000000';
+        thisObj.extentLayer.addFeatures([featureBackup]);
+        thisObj.extentLayer.events.register(
+            "featureadded", null, thisObj.addFeature);
+        return;
+    }
 
     var wkt = thisObj.wktParser.write(theFeat);
     var geoJSONObj = JSON.parse(thisObj.geoJsonParser.write(theFeat));

@@ -1,4 +1,27 @@
 {% extends "template.html" %}
 {% block content %}
-    <h2>Under Construction ...</h2>
+    <h3>About Open Terrain Map</h3>
+    <div style="width: 500px; text-align: justify; padding-left: 20px;">
+        <p>
+            As a Peace Corps volunteer charged with the design and implementation of small scale
+            water and sanitation infrastructure projects, I found a need for a way
+            to quickly generate preliminary designs and cost estimates.  This application aims to fill that
+            need by generating designs based on user input of digitized features such as
+            the location of houses, known restrictions to construction, and desired locations of
+            water tanks or water treatment facilities.  An added benefit is to take the focus off the
+            technical aspects of the project.  Community organization and empowerment of leaders
+            is the key to projects that not only are built but continue to be successful.<br/>
+            <br/>
+            Any design algorithms will require  global coverage of reasonably accurate elevation models.
+            This has and will continue to require substantial effort to process and store the elevation models,
+            The thought of a more general application by which users could access the information arose.
+            It is the hope that Open Terrain Map will support a variety of applications such as watershed analysis,
+            disaster planning and recovery, and others that implement digital elevation data.<br/>
+            <br/>
+            At present, world wide elevation data is available at 30 meter resolution.  Planned improvements
+            include incorporating elevation models of higher resolution and openly available LIDAR data.
+            High resolution information will not be available in all areas.  For this need, I plan to implement
+            methods to retrieve the relatively course elevation data to a higher resolution. 
+        </p>
+    </div>
 {% endblock %}

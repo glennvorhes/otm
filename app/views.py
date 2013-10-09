@@ -14,7 +14,6 @@ import exampleFeatures
 import os
 import uuid
 import io
-import zipfile
 import shutil
 
 
@@ -180,13 +179,18 @@ def getDem():
 
     isGeomValid = True
 
+    if not inSrid == 4326:
+        return 'only SRID 4326 is currently supported'
+
     conn = psycopg2.connect(ConnStringDEM_DB)
     cur = conn.cursor()
 
     try:
-        cur.execute("select ST_IsValid(ST_GeomFromText('{0}',{1})) as isvalid".format(geomWKT, inSrid))
-        isGeomValid = bool(cur.fetchone()[0])
-
+        cur.execute("select ST_IsValid(ST_GeomFromText('{0}',{1})) as isvalid, \
+                    ST_Area(ST_Transform(ST_GeomFromText('{0}',{1}),3857)) as area".format(geomWKT, inSrid))
+        result = cur.fetchone()
+        isGeomValid = bool(result[0])
+        area = float(result[1])
     except:
         conn.close()
         del conn, cur
@@ -195,6 +199,8 @@ def getDem():
     # Bail out if the geometry isn't valid
     if not isGeomValid:
         return 'geom not valid'
+    if area > 246952910:
+        return 'geom too big'
 
     query = "SELECT \
         ST_AsPNG(\
@@ -330,7 +336,9 @@ def addpost():
 @app.route('/')
 @app.route('/index')
 def index():
-    posts = db_session.query(models.Post).order_by(models.Post.timestamp.desc())
+    posts = db_session.query(models.Post).order_by(models.Post.id.desc())
+    for p in posts:
+        print p.body
 
     VALID_TAGS = ['strong', 'em', 'p', 'ul', 'li', 'br', 'b', 'i', 'code']
 

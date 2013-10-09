@@ -10,12 +10,12 @@
                     <span class="col_b">{{ post0Title }}</span><br/>
                         {{ post0Body|safe }}
                 </div>
-                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif')}}" alt="" /></a></div>
+{#                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif')}}" alt="" /></a></div>#}
                 <div class="right_b">
                     <span class="col_b">{{ post1Title }}</span><br/>
                     {{ post1Body|safe }}
                 </div>
-                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a></div>
+{#                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a></div>#}
             </div><br/>
         </div>
         <div id="left">
@@ -28,15 +28,15 @@
                     that can be used for a variety of applications.
                 </span><br/>
                 Elevation models available from NASA and the USGS are saved as raster images.  Where available,
-                LIDAR data is used to create locally high resolution models. Additionally, hydrologic
-                vector features are used to further process the model to create a hydrologically correct elevation
-                model.  The result is a world wide coverage digital elevation model that is continuously being refined
-                and is served as a web map tile service.  The DEM can be used for a variety of applications including
+                LIDAR data is used to create locally high resolution models. Additionally,
+                features such as lakes and rivers are used for further processing to create hydraulically correct
+                models.  The result is a world wide coverage digital elevation model that is continuously being refined
+                and is served as a web map tile service.  The model can be used for a variety of applications including
                 disaster response, watershed analysis, and preliminary infrastructure design.
                 <br/>
-                 <div class="read">
-                     <a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a>
-                 </div>
+{#                 <div class="read">#}
+{#                     <a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a>#}
+{#                 </div>#}
             </div>
             <a href='{{ url_for('infraExample') }}'><h2>Terrain Based Applications</h2></a>
             <div class="text">
@@ -53,12 +53,12 @@
                 to produce a preliminary design for small scale infrstructure projects.  The idea was focused
                 on projects in the developing world but it would likely be useful rural and small town projects
                 as well.  The goal is to take the focus off the technical aspects of infrastructure design and
-                put the focus on the more important aspects for the sustainability of the project which is the
-                financial and logistic orgnaization of the project.
+                to dedicate attention to community, financial, and logistic organization which leads to
+                more sustainable projects.
                 <br/>
-                <div class="read">
-                    <a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a>
-                </div>
+{#                <div class="read">#}
+{#                    <a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a>#}
+{#                </div>#}
             </div>
         </div><br/>
         <div style="clear: both"></div>

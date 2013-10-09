@@ -15,6 +15,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 #dialect+driver://username:password@host:port/database
 ######## LocalHost ########
 SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:turkey@localhost:5432/webInfo'
+# SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:turkey@localhost:5432/testrestore'
 ConnStringDEM_DB = "dbname=OTM user=postgres password=turkey host=localhost port=5432"
 
 ######## Server database ########
