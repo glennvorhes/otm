@@ -74,7 +74,7 @@ body {
     text-decoration:none;
     color:#fff;
     padding-top:11px;
-    width:201px;
+    width:168px;
 }
 
 #buttons a:hover {
@@ -97,6 +97,7 @@ body {
     width:240px;
     height: 210px;
     overflow: hidden;
+    text-align: justify;
 }
 
 .text {

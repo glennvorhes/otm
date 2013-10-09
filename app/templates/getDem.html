@@ -1,8 +1,8 @@
 {% extends "template.html" %}
 {% block head %}
     <style>
-        div p {
-            width: 400px;
+        div p, h4, h3 {
+            width: 500px;
             padding-left: 20px;
             text-align: justify;
         }
@@ -11,12 +11,25 @@
 {% endblock %}
 {% block content %}
     <div>
-        <h2>Get Elevation Model URL Structure</h2>
 
-        <span>
-            {{ request.url_root }}getdem?insrid=<<i>SRID Code</i>>&outsrid=<<i>SRID Code</i>
-            >&outformat=<<i>Output Format</i>>&geom=<<i>Geometry Text</i>>
-        </span>
+        <h1>Image Format</h1>
+        <p>
+            The elevation models are shown and downloaded in the same format as they are saved in the
+            in the database.  In the interests of storage savings and the ability to send the images to
+            browsers, the images were converted from the 32 bit .tif images to 3 band RGB images.  In order
+            to accommodate the range in elevation values within the context of 8 bit integers, the images
+            were converted as follows;
+        </p>
+        <h4>Red Band = whole integer value of elevation divided by 256</h4>
+        <h4>Green Band = whole number remainder</h4>
+        <h4>Blue Band  = the decimal portion times 255, rounded to to the nearest whole number</h4>
+        <p>
+            The following raster algebra will produce an elevation model with values of +/- 4 mm of that in the
+            original raster.  The values R,G,and B denote the values of the red, green, and blue bands respectively.
+            Improvements that will let the user download the model with a single band representing the true elevation
+            values is in development.
+        </p>
+        <h4>Elevation Value = R * 256 + G + B / 255</h4>
         <br/>
         <br/>
         <h1>Input Parameters</h1>
