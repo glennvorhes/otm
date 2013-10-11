@@ -17,12 +17,10 @@ import io
 import shutil
 
 
-
-
-
 @app.route('/testurl')
 def testurl():
     return 'At the test url, more stuff'
+
 
 @app.route('/testtemplate')
 def testtemplate():
@@ -34,9 +32,11 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
+
 @app.route('/example/terrainmap')
 def terrainMap():
     return render_template('terrainMap.html', title='Terrain Map')
+
 
 @app.route('/example/infrastructure')
 def infraExample():
@@ -61,10 +61,12 @@ def infraExample():
                            title=props['project_name'],
                            jsonProps=jsonProps)
 
+
 @app.route('/example/getfeatures')
 def exampleGetFeatures():
     session['maxfid'] = 100
     return exampleFeatures.exampleFeatJSON
+
 
 @app.route('/example/addfeature', methods=['POST'])
 def exampleAddfeature():
@@ -127,6 +129,7 @@ def exampleEditFeatures():
         return jsonify(fid=-1)
     else:
         return jsonify(fid=featFID)
+
 
 @app.route('/example/updateextent', methods=['POST'])
 def exampleUpdateExtent():
@@ -314,6 +317,7 @@ def getDem():
         response.headers['Content-Type'] = 'image/png'
         return response
 
+
 @app.route('/addpost', methods=['GET', 'POST'])
 @login_required
 def addpost():
@@ -332,6 +336,7 @@ def addpost():
         return redirect(url_for('index'))
     else:
         return render_template('addPost.html', newPostForm=addNewPost, title='Add Post')
+
 
 @app.route('/')
 @app.route('/index')
@@ -398,13 +403,16 @@ def getProjects():
 def blog():
     return render_template('blog.html', title='Open Terrain Map - Blog')
 
+
 @app.route('/about')
 def about():
     return render_template('about.html', title='Open Terrain Map - About')
 
+
 @app.route('/contact')
 def contact():
     return render_template('contact.html', title='Open Terrain Map - Contact')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
@@ -419,6 +427,7 @@ def login():
                            title='Sign In',
                            form=form,
                            providers=app.config['OPENID_PROVIDERS'])
+
 
 @oid.after_login
 def after_login(resp):
@@ -441,13 +450,16 @@ def after_login(resp):
     login_user(user, remember=remember_me)
     return redirect(request.args.get('next') or url_for('index'))
 
+
 @lm.user_loader
 def load_user(id):
     return db_session.query(models.User).get(int(id))
 
+
 @app.before_request
 def before_request():
     g.user = current_user
+
 
 @app.route('/logout')
 def logout():
@@ -455,6 +467,7 @@ def logout():
         del session[key]
     logout_user()
     return redirect(url_for('index'))
+
 
 @app.route('/map/getfeatures')
 @login_required
@@ -494,6 +507,7 @@ def setProject():
         set_proj_success = True
     return jsonify(success=set_proj_success)
 
+
 @app.route('/map', methods=['GET', 'POST'])
 @login_required
 def showmap():
@@ -532,6 +546,7 @@ def showmap():
     return render_template('map.html',
                            title=session['currentProject']['project_name'],
                            jsonProps=jsonProps)
+
 
 @app.route('/map/addfeature', methods=['POST'])
 @login_required
@@ -587,6 +602,7 @@ def addfeature():
 
     return jsonify(fid=newFeature.fid, featureProperties=featureProperties)
 
+
 @app.route('/map/editfeaturegeom', methods=['POST'])
 @login_required
 def editfeaturegeom():
@@ -607,6 +623,7 @@ def editfeaturegeom():
     updateFeature.geom = newGeom
     db_session.commit()
     return jsonify(fid=featFID)
+
 
 @app.route('/map/updateextent', methods=['POST'])
 @login_required
@@ -642,6 +659,7 @@ def updateextent():
         return jsonify(code=1)
     else:
         return jsonify(code=-2)
+
 
 @app.route('/map/deletefeature', methods=['POST'])
 @login_required
