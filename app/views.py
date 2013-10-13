@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, make_response, send_file, send_from_directory
 from flask_login import login_user, logout_user, current_user, login_required
-from app import app, db_session, lm, oid, models, tempZipDir
+from app import app, lm, oid, models, tempZipDir, DatabaseSessionMaker
 import forms
 from geoalchemy2.elements import WKTElement
 from datetime import datetime
@@ -17,12 +17,10 @@ import io
 import shutil
 
 
-
-
-
 @app.route('/testurl')
 def testurl():
     return 'At the test url, more stuff'
+
 
 @app.route('/testtemplate')
 def testtemplate():
@@ -34,9 +32,11 @@ def testtemplate():
                            theName=userName,
                            flaskAlert=alertString)
 
+
 @app.route('/example/terrainmap')
 def terrainMap():
     return render_template('terrainMap.html', title='Terrain Map')
+
 
 @app.route('/example/infrastructure')
 def infraExample():
@@ -61,10 +61,12 @@ def infraExample():
                            title=props['project_name'],
                            jsonProps=jsonProps)
 
+
 @app.route('/example/getfeatures')
 def exampleGetFeatures():
     session['maxfid'] = 100
     return exampleFeatures.exampleFeatJSON
+
 
 @app.route('/example/addfeature', methods=['POST'])
 def exampleAddfeature():
@@ -82,7 +84,9 @@ def exampleAddfeature():
     newGeom = WKTElement(geomWKT, srid=srid)
     # Check the geometry before proceeding
     # geomSimple =  db_session.scalar(func.is_simple(newGeom))ST_IsValid
+    db_session = DatabaseSessionMaker()
     geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+    db_session.close()
     # geomValid =  db_session.scalar(func.is_valid(newGeom))
     if not (geomValid):
         return jsonify(fid=-1)
@@ -120,7 +124,9 @@ def exampleEditFeatures():
 
     newGeom = WKTElement(geomWKT, srid=srid)
     # Check the geometry before proceeding
+    db_session = DatabaseSessionMaker()
     geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+    db_session.close()
     # geomSimple = db_session.scalar(func.is_simple(newGeom))
     # geomValid = db_session.scalar(func.is_valid(newGeom))
     if not geomValid:
@@ -128,11 +134,14 @@ def exampleEditFeatures():
     else:
         return jsonify(fid=featFID)
 
+
 @app.route('/example/updateextent', methods=['POST'])
 def exampleUpdateExtent():
+
     # Task ids add: 1, modify:2, clear:3
     updateTask = int(request.form["updatetask"])
     if updateTask == 1 or updateTask == 2:
+        db_session = DatabaseSessionMaker()
         geomWKT = str(request.form["geomWKT"])
         srid_raw = str(request.form["srid"])
         # Just need the SRID number
@@ -143,7 +152,7 @@ def exampleUpdateExtent():
         # geomSimple =  db_session.scalar(func.is_simple(newGeom))
         # geomValid =  db_session.scalar(func.is_valid(newGeom))
         geomValid = db_session.scalar(func.ST_IsValid(newGeom))
-
+        db_session.close()
         if not geomValid:
             return jsonify(code=-1)
         return jsonify(code=1)
@@ -314,6 +323,7 @@ def getDem():
         response.headers['Content-Type'] = 'image/png'
         return response
 
+
 @app.route('/addpost', methods=['GET', 'POST'])
 @login_required
 def addpost():
@@ -327,15 +337,19 @@ def addpost():
         postContent = str(addNewPost.newPostContent.data)
 
         theNewPost = models.Post(postTitle=postTitle, body=postContent, user_id=g.user.get_id())
+        db_session = DatabaseSessionMaker()
         db_session.add(theNewPost)
         db_session.commit()
+        db_session.close()
         return redirect(url_for('index'))
     else:
         return render_template('addPost.html', newPostForm=addNewPost, title='Add Post')
 
+
 @app.route('/')
 @app.route('/index')
 def index():
+    db_session = DatabaseSessionMaker()
     posts = db_session.query(models.Post).order_by(models.Post.id.desc())
     for p in posts:
         print p.body
@@ -361,7 +375,7 @@ def index():
         post0Body = 'Body 1'
         post1Title = 'Title 2'
         post1Body = 'Body 2'
-
+    db_session.close()
     return render_template('index.html', title='Home',
                            post0Title=post0Title, post0Body=post0Body,
                            post1Title=post1Title, post1Body=post1Body)
@@ -370,6 +384,7 @@ def index():
 @app.route('/projects', methods=['GET', 'POST'])
 @login_required
 def getProjects():
+    db_session = DatabaseSessionMaker()
     projform = forms.ProjectForm()
     if request.method == "POST" and projform.validate():
         projTID = int(request.form["proj_type"])
@@ -388,6 +403,7 @@ def getProjects():
     for p in projects_type_tuple:
         userProjectList.append(p.Project.pid)
     session['userProjectList'] = userProjectList
+    db_session.close()
     return render_template('projects.html',
                            title='Projects',
                            user_projects=projects_type_tuple,
@@ -398,13 +414,16 @@ def getProjects():
 def blog():
     return render_template('blog.html', title='Open Terrain Map - Blog')
 
+
 @app.route('/about')
 def about():
     return render_template('about.html', title='Open Terrain Map - About')
 
+
 @app.route('/contact')
 def contact():
     return render_template('contact.html', title='Open Terrain Map - Contact')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
@@ -420,8 +439,10 @@ def login():
                            form=form,
                            providers=app.config['OPENID_PROVIDERS'])
 
+
 @oid.after_login
 def after_login(resp):
+    db_session = DatabaseSessionMaker()
     if resp.email is None or resp.email == "":
         flash('Invalid login. Please try again.')
         redirect(url_for('login'))
@@ -439,15 +460,22 @@ def after_login(resp):
         remember_me = session['remember_me']
         session.pop('remember_me', None)
     login_user(user, remember=remember_me)
+    db_session.close()
     return redirect(request.args.get('next') or url_for('index'))
+
 
 @lm.user_loader
 def load_user(id):
-    return db_session.query(models.User).get(int(id))
+    db_session = DatabaseSessionMaker()
+    userid =  db_session.query(models.User).get(int(id))
+    db_session.close()
+    return userid
+
 
 @app.before_request
 def before_request():
     g.user = current_user
+
 
 @app.route('/logout')
 def logout():
@@ -456,9 +484,11 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+
 @app.route('/map/getfeatures')
 @login_required
 def getfeatures():
+    db_session = DatabaseSessionMaker()
     jsonstring = '{ "type": "FeatureCollection",\n\t"features": [\n'
     try:
         currentProjectPID = int(session['currentProject']['pid'])
@@ -479,12 +509,14 @@ def getfeatures():
         jsonstring = jsonstring[:jsonstring.rfind(',')] + '\n'
 
     jsonstring += '\t]\n}'
+    db_session.close()
     return jsonstring
 
 
 @app.route('/setProject', methods=['POST'])
 @login_required
 def setProject():
+    db_session = DatabaseSessionMaker()
     db_session.expunge_all()
     set_proj_success = False
     selected_pid = int(request.form["pid"])
@@ -492,11 +524,15 @@ def setProject():
         session['currentpid'] = selected_pid
 
         set_proj_success = True
+
+    db_session.close()
     return jsonify(success=set_proj_success)
+
 
 @app.route('/map', methods=['GET', 'POST'])
 @login_required
 def showmap():
+    db_session = DatabaseSessionMaker()
     #if a project has not been selected in the projects page, return there
     if not 'currentpid' in session:
         return redirect(url_for('getProjects'))
@@ -529,13 +565,16 @@ def showmap():
     session['currentProject'] = props
 
     jsonProps = simplejson.dumps(session['currentProject'])
+    db_session.close()
     return render_template('map.html',
                            title=session['currentProject']['project_name'],
                            jsonProps=jsonProps)
 
+
 @app.route('/map/addfeature', methods=['POST'])
 @login_required
 def addfeature():
+    db_session = DatabaseSessionMaker()
     geomWKT = str(request.form["geomWKT"])
     srid_raw = str(request.form["srid"])
     # Just need the SRID number
@@ -549,6 +588,7 @@ def addfeature():
     geomValid = db_session.scalar(func.ST_IsValid(newGeom))
     # geomValid =  db_session.scalar(func.is_valid(newGeom))
     if not (geomValid):
+        db_session.close()
         return jsonify(fid=-1,valid=False)
 
     proj = db_session.query(models.Project).get(session['currentProject']['pid'])
@@ -584,12 +624,14 @@ def addfeature():
             continue
         else:
             featureProperties[p]=getattr(newFeature, p)
-
+    db_session.close()
     return jsonify(fid=newFeature.fid, featureProperties=featureProperties)
+
 
 @app.route('/map/editfeaturegeom', methods=['POST'])
 @login_required
 def editfeaturegeom():
+    db_session = DatabaseSessionMaker()
     geomWKT = str(request.form["geomWKT"])
     # Just need the SRID number
     srid_raw = str(request.form["srid"])
@@ -606,11 +648,14 @@ def editfeaturegeom():
     updateFeature = db_session.query(models.Feature).get(featFID)
     updateFeature.geom = newGeom
     db_session.commit()
+    db_session.close()
     return jsonify(fid=featFID)
+
 
 @app.route('/map/updateextent', methods=['POST'])
 @login_required
 def updateextent():
+    db_session = DatabaseSessionMaker()
     # Task ids add: 1, modify:2, clear:3
     updateTask = int(request.form["updatetask"])
     if updateTask == 1 or updateTask == 2:
@@ -639,17 +684,22 @@ def updateextent():
         proj = db_session.query(models.Project).get(session['currentProject']['pid'])
         proj.geom = None
         db_session.commit()
+        db_session.close()
         return jsonify(code=1)
     else:
+        db_session.close()
         return jsonify(code=-2)
+
 
 @app.route('/map/deletefeature', methods=['POST'])
 @login_required
 def deletefeature():
+    db_session = DatabaseSessionMaker()
     # Task ids add: 1, modify:2, clear:3
     deleteFID = int(request.form["deleteFID"])
     deleteFeature = db_session.query(models.Feature).get(deleteFID)
     db_session.delete(deleteFeature)
     db_session.commit()
+    db_session.close()
     return jsonify(success=0)
 

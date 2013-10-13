@@ -32,6 +32,8 @@
         <h4>Elevation Value = R * 256 + G + B / 255</h4>
         <br/>
         <br/>
+        <h1>URL structure</h1>
+        <span>{{ request.url_root }}getdem?outformat=<<b>Output Format</b>>&insrid=<<b>SRID Code</b>>&outsrid=<<b>SRID Code</b>>&geom=<<b>Geometry Well Known Text</b>></span>
         <h1>Input Parameters</h1>
         <h3>SRID Code</h3>
         <p>
@@ -46,18 +48,18 @@
                 <li>
                     <b>base64png</b> The base 64 representation of the PNG.  <br/>This is useful for
                     adding the returned results to an image tag or url in the <br/>context of
-                    src/url = 'data:image/png;base64,<<i>base 64 string</i>></li>
-                <li><b>imagepng</b> Returns a png image to the browser.  This is the default.</li>
+                    src/url = "data:image/png;base64,<<i>base 64 string</i>>"</li>
+                <li><b>zip</b> Returns the image and an xml with projection information in a zip file</li>
 
             </ul>
         </p>
-        <h3>Geometry Text</h3>
+        <h3>Geometry Well Known Text</h3>
         <p>
             The well known text (WKT) representation of the polygon input geometry with
             the following format for an input geometry with four corners points P1 trhough P4, each
             with coordinates x and y.  Note the double parentheses and that first point is repeated at the end to represent
             the closure of the polygon<br/>
-            <i>POLYGON((C1X C1Y,C2X C2Y,C3X C3Y,C4X C4Y,C1X C1Y))</i>
+            <i>POLYGON((P1X P1Y,P2X P2Y,P3X P3Y,P4X P4Y,P1X P1Y))</i>
         </p>
         <h1>Examples</h1>
 
