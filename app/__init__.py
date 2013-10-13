@@ -19,7 +19,7 @@ babel = Babel(app)
 # Database location, username, and password defined elsewhere
 # Accessed here by app.config['SQLALCHEMY_DATABASE_URI']
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False)
-Session = sessionmaker(bind=engine)
+DatabaseSessionMaker = sessionmaker(bind=engine)
 
 # Define models base
 metadata = MetaData(engine)
@@ -28,7 +28,7 @@ Base = declarative_base(metadata=metadata)
 #db_session object used for all database interaction
 # Insert, update, delete
 # Nothing happens at the database until call to db_session.commit()
-db_session = Session()
+# db_session = Session()
 
 # Not to be confused with 'session' object which is declared globally
 # as a part of the Flask application
