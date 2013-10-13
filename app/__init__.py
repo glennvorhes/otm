@@ -20,9 +20,11 @@ babel = Babel(app)
 # Accessed here by app.config['SQLALCHEMY_DATABASE_URI']
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=False)
 Session = sessionmaker(bind=engine)
+
+# Define models base
 metadata = MetaData(engine)
 Base = declarative_base(metadata=metadata)
-Session = sessionmaker(bind=engine)
+
 #db_session object used for all database interaction
 # Insert, update, delete
 # Nothing happens at the database until call to db_session.commit()
