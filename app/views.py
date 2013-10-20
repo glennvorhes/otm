@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, make_response, send_file, send_from_directory
+from flask import render_template, flash, redirect, session, url_for, request, g, jsonify, make_response, send_file
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, lm, oid, models, tempZipDir, DatabaseSessionMaker
 import forms
@@ -87,7 +87,7 @@ def exampleAddfeature():
     db_session = DatabaseSessionMaker()
     geomValid = db_session.scalar(func.ST_IsValid(newGeom))
     db_session.close()
-    # geomValid =  db_session.scalar(func.is_valid(newGeom))
+
     if not (geomValid):
         return jsonify(fid=-1)
 
@@ -95,9 +95,9 @@ def exampleAddfeature():
 
     print currentLayer + geomType
     if currentLayer == 'DWELLING' and geomType == 'POINT':
-        featureProperties = {"occupants":3, "fid": maxfid, "owner": None}
+        featureProperties = {"occupants": 3, "fid": maxfid, "owner": None}
     elif currentLayer == 'DWELLING' and geomType == 'POLYGON':
-        featureProperties = {"occupants":3, "fid": maxfid, "owner": None}
+        featureProperties = {"occupants": 3, "fid": maxfid, "owner": None}
     elif currentLayer == 'IMPEDANCE' and geomType == 'LINESTRING':
         featureProperties = {"fid": maxfid, "impedance": None}
     elif currentLayer == 'IMPEDANCE' and geomType == 'POLYGON':
@@ -139,25 +139,25 @@ def exampleEditFeatures():
 def exampleUpdateExtent():
 
     # Task ids add: 1, modify:2, clear:3
-    updateTask = int(request.form["updatetask"])
-    if updateTask == 1 or updateTask == 2:
+    update_task = int(request.form["updatetask"])
+    if update_task == 1 or update_task == 2:
         db_session = DatabaseSessionMaker()
-        geomWKT = str(request.form["geomWKT"])
+        geom_wkt = str(request.form["geomWKT"])
         srid_raw = str(request.form["srid"])
         # Just need the SRID number
         srid = long(srid_raw[srid_raw.find(':')+1:])
 
-        newGeom = WKTElement(geomWKT, srid=srid)
+        new_geom = WKTElement(geom_wkt, srid=srid)
         # Check the geometry before proceeding
         # geomSimple =  db_session.scalar(func.is_simple(newGeom))
         # geomValid =  db_session.scalar(func.is_valid(newGeom))
-        geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+        geom_valid = db_session.scalar(func.ST_IsValid(new_geom))
         db_session.close()
-        if not geomValid:
+        if not geom_valid:
             return jsonify(code=-1)
         return jsonify(code=1)
 
-    elif updateTask == 3:
+    elif update_task == 3:
         return jsonify(code=1)
     else:
         return jsonify(code=-2)
@@ -261,39 +261,11 @@ def getDem():
         projString = cur.fetchone()[0]
         conn.close()
 
-
-        # print projString
-        # projString = projString.replace('"', '&quot')
-
-        # aux_xml = '''
-        # <PAMDataset>
-        #   <SRS>GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],PRIMEM[&quot;Greenwich&quot;,0],UNIT[&quot;degree&quot;,0.0174532925199433],AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]</SRS>
-        #     <GeoTransform> -6.8000138888888884e+01,  2.7777777777777778e-04,  0.0000000000000000e+00,  1.9000138888888888e+01,  0.0000000000000000e+00, -2.7777777777777778e-04</GeoTransform>
-        #   <Metadata domain="IMAGE_STRUCTURE">
-        #     <MDI key="INTERLEAVE">PIXEL</MDI>
-        #   </Metadata>
-        # </PAMDataset>
-        #
-
         aux_xml = '<PAMDataset><SRS>{0}</SRS>\
 <GeoTransform>{1:E},  {2:E},  {3:E},  {4:E},  {5:E}, {6:E}</GeoTransform>\
 <Metadata domain="IMAGE_STRUCTURE"><MDI key="INTERLEAVE">PIXEL</MDI></Metadata>\
 </PAMDataset>'.format(projString, float(metaList[0]), float(metaList[4]), float(metaList[6]),
                       float(metaList[1]), float(metaList[7]), float(metaList[5]))
-
-
-# print '{0:E} {1:E}'.format(1234567890, 1341234)
-        # print '{:E} {:E}'.format(1234567890, 1341234)
-        # aux_xml = '''
-        # <PAMDataset>
-        #   <SRS>{0}</SRS>
-        #   <GeoTransform> {1},  {2},  {3},  {4},  {5}, {6}</GeoTransform>
-        #   <Metadata domain="IMAGE_STRUCTURE">
-        #     <MDI key="INTERLEAVE">PIXEL</MDI>
-        #   </Metadata>
-        # </PAMDataset>
-        # '''.format(projString, metaList[0], metaList[4], metaList[6], metaList[1], metaList[7], metaList[5])
-
 
         with io.open(os.path.join(tempFolder, 'dem.png'), 'wb') as file:
             file.write(str(buffer))
