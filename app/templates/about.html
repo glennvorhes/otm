@@ -1,4 +1,55 @@
 {% extends "template.html" %}
+{% block head %}
+<style>
+    #about_logos{
+        border: solid darkgray;
+        margin:0px 100px;
+        border-radius: 15px;
+    }
+
+    #about_logos * {
+        text-align: center;
+    }
+
+    #about_logos > div{
+        width: 49%;
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;"
+    }
+
+    #about_logos img{
+        vertical-align: top;
+        width: 90%;
+    }
+
+    .sidebysidelogo{
+        width:46%;
+        display: inline-block;
+        
+    }
+    
+    .sidebysidelogo img{
+        width:98%;
+    }
+
+    .logo_group{
+        border: solid darkgray;
+        margin:7px;
+        border-radius: 10px;
+    }
+
+    .logo_group > img{
+        width: 95%;
+    }
+
+    .logo_group2 > img{
+        width: 60%;
+    }
+</style>
+
+{% endblock %}
+
 {% block content %}
     <h3>About Open Terrain Map</h3>
     <div style="width: 500px; text-align: justify; padding-left: 20px;">
@@ -17,11 +68,84 @@
             The thought of a more general application by which users could access the information arose.
             It is the hope that Open Terrain Map will support a variety of applications such as watershed analysis,
             disaster planning and recovery, and others that implement digital elevation data.<br/>
-            <br/>
-            At present, world wide elevation data is available at 30 meter resolution.  Planned improvements
-            include incorporating elevation models of higher resolution and openly available LIDAR data.
-            High resolution information will not be available in all areas.  For this need, I plan to implement
-            methods to retrieve the relatively course elevation data to a higher resolution. 
         </p>
     </div>
+    <div id='about_logos'>
+        <div>
+            <h1>Server Side</h1>
+            <div class='logo_group'>
+                <h1>Web Framework</h1>
+                <a href="http://flask.pocoo.org/"> <img src="{{ url_for('static',filename='img/flask_logo.png') }}"></a>
+                <div class='sidebysidelogo'>
+                    <a href="http://werkzeug.pocoo.org/"> <img src="{{ url_for('static',filename='img/werkzueg_logo.png') }}"></a>
+                </div>
+                <div class='sidebysidelogo'>
+                    <a href="http://jinja.pocoo.org/docs/"><img src="{{ url_for('static',filename='img/jinja_logo.png') }}"></a>
+                </div>
+            </div>
+            <div class='logo_group'>
+                <h1>Database</h1>
+                <div class='sidebysidelogo'>
+                    <a href="http://www.postgresql.org/"> <img src="{{ url_for('static',filename='img/postgresql_logo.png') }}"></a>
+                </div>
+                <div class='sidebysidelogo'>
+                    <a href="http://postgis.net/"> <img src="{{ url_for('static',filename='img/postgis_logo.png') }}"></a>
+                </div>
+            </div>
+            <div class='logo_group'>
+                <h1>Abstraction</h1>
+                <div class='sidebysidelogo'>
+                    <a href="http://www.sqlalchemy.org/"> <img width="40%" src="{{ url_for('static',filename='img/sqlalchemy_logo.png') }}"></a>
+                </div>
+                <div class='sidebysidelogo'>
+                    <a href="https://geoalchemy-2.readthedocs.org/en/latest/"> <img width="40%" src="{{ url_for('static',filename='img/geoalchemy_logo.png') }}"></a>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class='logo_group2'>
+                <h1>Client Side</h1>
+                <div class='logo_group'>
+                    <h2 style="text-align: center;">Browser Based Mapping</h2>
+                    <a href="http://openlayers.org/"> <img src="{{ url_for('static',filename='img/openlayers_logo.png') }}"></a>
+                    <br/>
+                    <br />
+                </div>
+                <div class='logo_group'>
+                    <h2>Other JavaScript Libraries</h2>
+                    <a href="http://dojotoolkit.org/"> <img src="{{ url_for('static',filename='img/dojo_logo.png') }}"></a>
+                    <br/>
+                    <br/>
+                    <a href="http://jquery.com/"> <img src="{{ url_for('static',filename='img/jquery_logo.png') }}"></a>
+                    <br />
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+{#    <div style="border: solid darkgray; border-radius: 10px; margin;20px;">#}
+{##}
+{#        <p style="border-right: solid darkgray;width: 49%; display: inline-block; vertical-align: top; text-align: center;">#}
+{##}
+{#            <a href="http://flask.pocoo.org/"> <img width="90%" src="{{ url_for('static',filename='img/flask_logo.png') }}"></a>#}
+{#            <span style="width:49%"></span>#}
+{#            <span style="width:49%;"></span>#}
+{##}
+{#            #}
+{#            #}
+{#            #}
+{#            <br/>#}
+{#        </p>#}
+{#        <p style="width: 49%; display: inline-block; vertical-align: top; text-align: center;">#}
+{#           #}
+{#           #}
+{#        </p>#}
+{#    </div>#}
+
+{#        <a href="http://www.gdal.org/"> <img src="{{ url_for('static',filename='img/gdal_logo.png') }}"></a>#}
+
+{#        <a href="http://www.scipy.org/"><img src="{{ url_for('static',filename='img/scipy_logo.png') }}"></a>#}
+
+
 {% endblock %}

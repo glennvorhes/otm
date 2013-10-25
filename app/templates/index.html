@@ -3,24 +3,10 @@
     <script src="{{ url_for('static', filename='js/terrainMap.js') }}"></script>
 {% endblock %}
 {% block content %}
-        <div id="right">
-            <h1>Latest Posts</h1>
-            <div class="tit_bot">
-                <div class="right_b">
-                    <span class="col_b">{{ post0Title }}</span><br/>
-                        {{ post0Body|safe }}
-                </div>
-{#                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif')}}" alt="" /></a></div>#}
-                <div class="right_b">
-                    <span class="col_b">{{ post1Title }}</span><br/>
-                    {{ post1Body|safe }}
-                </div>
-{#                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a></div>#}
-            </div><br/>
-        </div>
+
         <div id="left">
             <a href='{{ url_for('terrainMap') }}'><h2>Continously Improving Terrain Model</h2></a>
-            <div class="text">
+            <div class="front_page_text">
                 <a href='{{ url_for('terrainMap') }}'><img src="{{ url_for('static', filename='img/terrainMapImg.png') }}"
                      width="202" height="150" class="imgFloat" alt=""/></a>
                 <span>
@@ -28,7 +14,7 @@
                     that can be used for a variety of applications.
                 </span><br/>
                 Elevation models available from NASA and the USGS are saved as raster images.  Where available,
-                LIDAR data is used to create locally high resolution models. Additionally,
+                Light Detection and Ranging (LIDAR) data is used to create locally high resolution models. Additionally,
                 features such as lakes and rivers are used for further processing to create hydraulically correct
                 models.  The result is a world wide coverage digital elevation model that is continuously being refined
                 and is served as a web map tile service.  The model can be used for a variety of applications including
@@ -39,7 +25,7 @@
 {#                 </div>#}
             </div>
             <a href='{{ url_for('infraExample') }}'><h2>Terrain Based Applications</h2></a>
-            <div class="text">
+            <div class="front_page_text">
                 <a href='{{ url_for('infraExample') }}'><img src="{{ url_for('static', filename='img/infraMapImg.png') }}"
                      width="202" height="150" class="imgFloat" alt="" /></a>
                 <span>
@@ -61,6 +47,21 @@
 {#                </div>#}
             </div>
         </div><br/>
+            <div id="right">
+            <h1>Latest Posts</h1>
+            <div class="post_container">
+                <div class="short_post">
+                    <span class="post_title">{{ post0Title }}</span><br/>
+                    {{ post0Body|safe }}
+                </div>
+{#                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif')}}" alt="" /></a></div>#}
+                <div class="short_post">
+                    <span class="post_title">{{ post1Title }}</span><br/>
+                    {{ post1Body|safe }}
+                </div>
+{#                <div class="read"><a href="#"><img src="{{ url_for('static', filename='img/lyout/b_read.gif') }}" alt="" /></a></div>#}
+            </div><br/>
+        </div>
         <div style="clear: both"></div>
 
 {#    <p>#}
