@@ -1,10 +1,11 @@
 {% extends "two_column.html" %}
 {% block head1 %}
+        <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.js"></script>
+        <script src='http://openlayers.org/dev/OpenLayers.js'></script>
 
 
 {% endblock head1%}
 {% block nav_bar %}
-        <h3>Tutorials</h3>
         <ul>
             <li><a href="{{ url_for("tutorials") }}?show=featuregrid" class="{{ "nav_here" if show == "featuregrid" else "" }}">Feature Grid</a></li>
             <li><a href="{{ url_for("tutorials") }}?show=dbfeatures"  class="{{ "nav_here" if show == "dbfeatures" else "" }}">Database Features</a></li>
@@ -13,6 +14,15 @@
 {% endblock nav_bar %}
 {%  block main_content%}
 <div class="{{ "hide_this" if show != "" else "" }}">
+    <h1>Tutorials</h1>
+    <p>
+        I have prepared a number of tutorials that involve OpenLayers, Dojo, Flask, and the other open source projects
+        that make this site work.  A number of the features implemented required tedious internet searches so I would
+        like to let users avoid that effort.
+    </p>
+    <p>
+        Please feel free to comment on the tutorials or make requests.
+    </p>
 
 
 
