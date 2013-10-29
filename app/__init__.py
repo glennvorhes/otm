@@ -50,7 +50,8 @@ oid = OpenID(app, os.path.join(basedir, 'tmp'))
 tempZipDir = os.path.join(basedir, 'tmp/tempzip')
 
 # import other modules so they can be accessed from 'app'
-from app import views, models
+from app import models, views, map_views, login_views, example_views, get_dem_view
+
 
 
 

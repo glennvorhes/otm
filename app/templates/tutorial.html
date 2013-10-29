@@ -1,0 +1,48 @@
+{% extends "two_column.html" %}
+{% block head1 %}
+
+
+{% endblock head1%}
+{% block nav_bar %}
+        <h3>Tutorials</h3>
+        <ul>
+            <li><a href="{{ url_for("tutorials") }}?show=featuregrid" class="{{ "nav_here" if show == "featuregrid" else "" }}">Feature Grid</a></li>
+            <li><a href="{{ url_for("tutorials") }}?show=dbfeatures"  class="{{ "nav_here" if show == "dbfeatures" else "" }}">Database Features</a></li>
+            <li><a href="{{ url_for("tutorials") }}?show=mobileedit" class="{{ "nav_here" if show == "mobileedit" else "" }}">Mobile Editing</a></li>
+        </ul>
+{% endblock nav_bar %}
+{%  block main_content%}
+<div class="{{ "hide_this" if show != "" else "" }}">
+
+
+
+
+</div>
+<div class="{{ "hide_this" if show != "featuregrid" else "" }}">
+    <div class="{{ "hide_this" if page != "1" else "" }}">
+        birds
+    </div>
+    <div class="{{ "hide_this" if page != "2" else "" }}">
+        fish
+    </div>
+
+
+
+
+</div>
+<div class="{{ "hide_this" if show != "dbfeatures" else "" }}">
+
+
+
+</div>
+<div class="{{ "hide_this" if show != "mobileedit" else "" }}">
+
+
+
+</div>
+
+
+
+
+
+{% endblock main_content %}

@@ -97,6 +97,10 @@ body {
     background: rgba(72, 117, 178, 0.84)
 }
 
+.nav_here{
+    background: lightseagreen;
+}
+
 #right {
     width:285px;
     margin:0;
