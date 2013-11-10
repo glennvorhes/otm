@@ -36,41 +36,47 @@
     {#{% endwith %}#}
         <div id="main">
         <!-- header -->
-            <div id="header">
+        <div id="header">
+            <div class='pageBlock' style='position: relative;'>
+                <img src="{{ url_for('static', filename='img/lyout/banner.png') }}" alt='logo' width='1000'/>
+                <span style='position: absolute; left:320px; top: 80px; font-size: 64px; color: white;
+                text-shadow: -4px 0 black, 0 4px black, 4px 0 black, 0 -4px black;'>
+                    <b>Open Terrain Map</b>
+                </span>
+                <div id="loginControl" class="pageBlock">
+                    {% if g.user.is_authenticated() %}
+                        Logged in as: <br/>
+                        <b>{{g.user.nickname}}</b>&nbsp;<a href="{{ url_for('logout') }}">Logout</a>
+                    {% else %}
+                        <b>Login Here</b><br/>
+                        <a href="{{ url_for('login') }}">Login</a>
+                    {% endif %}
+                </div>
+            </div>
 
-                <div class='pageBlock' id="buttons">
-                    <ul>
-                        <li><a href="{{ url_for('index') }}">Home</a></li>
-                        <li><a href="{{ url_for('getDem') }}">Get Data</a></li>
-                        <li><a href="{{ url_for('getProjects') }}">Projects</a></li>
-                        <li><a href="{{ url_for('blog') }}">Blog</a></li>
-                        <li><a href="{{ url_for('about') }}">About</a></li>
-                        <li><a href="{{ url_for('contact') }}">Contact</a></li>
-                    </ul>
-                </div>
-                <div class='pageBlock' style='position: relative;'>
-                    <img src="{{ url_for('static', filename='img/lyout/banner.png') }}" alt='logo' width='1000'/>
-                    <span style='position: absolute; left:320px; top: 80px; font-size: 64px; color: white;
-                    text-shadow: -4px 0 black, 0 4px black, 4px 0 black, 0 -4px black;'>
-                        <b>Open Terrain Map</b>
-                    </span>
-                    <div id="loginControl" class="pageBlock">
-                        {% if g.user.is_authenticated() %}
-                            Logged in as: <br/>
-                            <b>{{g.user.nickname}}</b>&nbsp;<a href="{{ url_for('logout') }}">Logout</a>
-                        {% else %}
-                            <b>Login Here</b><br/>
-                            <a href="{{ url_for('login') }}">Login</a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+
+        </div>
         <!-- / header -->
-        <!-- content -->
-            <div class='pageBlock'>
-                {% block content %}{% endblock content%}
-            </div>
-        <!-- / content -->
+
+        <div class='pageBlock' style="padding-top: 40px;">
+            <nav id='buttons'>
+                <ul>
+                    <li><a href="{{ url_for('index') }}" class="{{ "nav_here" if title == "Home" else "" }}">Home</a></li>
+                    <li><a href="{{ url_for('getDem') }}" class="{{ "nav_here" if title == "Get Data" else "" }}">Get Data</a></li>
+                    <li><a href="{{ url_for('getProjects') }}" class="{{ "nav_here" if title == "Projects" else "" }}">Projects</a></li>
+                    <li><a href="{{ url_for('tutorials') }}" class="{{ "nav_here" if title == "Tutorials" else "" }}">Tutorials</a></li>
+                    <li><a href="{{ url_for('about') }}" class="{{ "nav_here" if title == "About" else "" }}">About</a></li>
+                    <li><a href="{{ url_for('contact') }}" class="{{ "nav_here" if title == "Contact" else "" }}">Contact</a></li>
+                </ul>
+            </nav>
+            <!-- content -->
+            {% block content %}{% endblock content%}
+            <!-- / content -->
+        </div>
+
+
+
+
         <!-- footer -->
 {#            <div id="footer" class='pageBlock'>#}
 {#                &copy;<script>var d = new Date(); document.write(d.getFullYear().toString());</script>#}

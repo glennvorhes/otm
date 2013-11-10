@@ -2,9 +2,9 @@
 <html>
     <head>
         {% if title %}
-            <title>Web Based Infrastructure Design - {{title}}</title>
+            <title>Open Terrain Map - {{title}}</title>
         {% else %}
-            <title>Web Based Infrastructure Design - Map</title>
+            <title>Open Terrain Map - Map</title>
         {% endif %}
         <script src='{{url_for('static', filename='js/dojo/dojo/dojo.js')}}' djConfig="parseOnLoad: true"></script>
         <link rel="stylesheet" href="{{url_for('static', filename='js/dojo/dijit/themes/soria/soria.css')}}">
@@ -119,6 +119,10 @@
                         alt="Del Extent" title='Clear extent' style='margin: 3px;'
                             id="CLEAR_set_extent_radio">
                 </div>
+                <img src="{{ url_for('static',filename='img/loading.gif') }}" id="loading_gif"
+                        style="position: absolute; top: 60px; left: 53px; visibility: hidden; z-index: 999;"
+                        width="90" height="90">
+
                 <div id='demOpacityTitleContainer' style="position: absolute; left:210px; top:10px; z-index:999; width:200px;">
                     <div id='demOpacityTitle' data-dojo-type="dijit/TitlePane"
                         data-dojo-props="title:'Elevation Opacity', closable:false, open:false, region:'center'"
@@ -150,7 +154,8 @@
                 <div id='demDownloadContainer' style="position: absolute; left:430px; top:10px; z-index:999; width:160px;">
                     <div id='demDownloadTitle' data-dojo-type="dijit/TitlePane"
                         data-dojo-props="title:'Download', closable:false, open:false, region:'center'"
-                        onMouseLeave="var demDown = dijit.byId('demDownloadTitle'); if (demDown.open) demDown.toggle()">
+{#                        onMouseLeave="var demDown = dijit.byId('demDownloadTitle'); if (demDown.open) demDown.toggle()"#}
+                            >
                         <label>Output SRID</label><br/>
                         <select id='sridSelect'>
                             <option value="4326" selected='selected'>EPSG 4326</option>

@@ -1,27 +1,159 @@
-{% extends "template.html" %}
-{% block content %}
-    <h3>About Open Terrain Map</h3>
-    <div style="width: 500px; text-align: justify; padding-left: 20px;">
-        <p>
-            As a Peace Corps volunteer charged with the design and implementation of small scale
-            water and sanitation infrastructure projects, I found a need for a way
-            to quickly generate preliminary designs and cost estimates.  This application aims to fill that
-            need by generating designs based on user input of digitized features such as
-            the location of houses, known restrictions to construction, and desired locations of
-            water tanks or water treatment facilities.  An added benefit is to take the focus off the
-            technical aspects of the project.  Community organization and empowerment of leaders
-            is the key to projects that not only are built but continue to be successful.<br/>
-            <br/>
-            Any design algorithms will require  global coverage of reasonably accurate elevation models.
-            This has and will continue to require substantial effort to process and store the elevation models,
-            The thought of a more general application by which users could access the information arose.
-            It is the hope that Open Terrain Map will support a variety of applications such as watershed analysis,
-            disaster planning and recovery, and others that implement digital elevation data.<br/>
-            <br/>
-            At present, world wide elevation data is available at 30 meter resolution.  Planned improvements
-            include incorporating elevation models of higher resolution and openly available LIDAR data.
-            High resolution information will not be available in all areas.  For this need, I plan to implement
-            methods to retrieve the relatively course elevation data to a higher resolution. 
-        </p>
-    </div>
-{% endblock %}
+{% extends "two_column.html" %}
+{% block head1 %}
+
+
+{% endblock head1%}
+{% block nav_bar %}
+        <h3>About Open Terrain Map</h3>
+        <ul>
+            <li><a href="{{ url_for("about") }}" class="{{ "nav_here" if show == "motivation" else "" }}">Project Motivation</a></li>
+            <li><a href="{{ url_for("about") }}?show=architecture"  class="{{ "nav_here" if show == "architecture" else "" }}">Application Architecture</a></li>
+            <li><a href="{{ url_for("about") }}?show=dem" class="{{ "nav_here" if show == "dem" else "" }}">Elevation Data</a></li>
+        </ul>
+{% endblock nav_bar %}
+{%  block main_content%}
+        <div class="{{ "hide_this" if show != "motivation" else "" }}">
+            <h3>Project Motivation</h3>
+            <p>
+                As a Peace Corps volunteer charged with the design and implementation of small scale
+                water and sanitation infrastructure projects, I found a need for a way
+                to quickly generate preliminary designs and cost estimates.  This application aims to fill that
+                need by generating designs based on user input of digitized features such as
+                the location of houses, known restrictions to construction, and desired locations of
+                water tanks or water treatment facilities.  An added benefit is to take the focus off the
+                technical aspects of the project.  Community organization and empowerment of leaders
+                is the key to projects that not only are built but continue to be successful.
+            </p>
+            <h3>Transition to Open Terrain Map</h3>
+            <p>
+                Any design algorithms will require  global coverage of reasonably accurate elevation models.
+                This has and will continue to require substantial effort to process and store the elevation models,
+                The thought of a more general application by which users could access the information arose.
+                It is the hope that Open Terrain Map will support a variety of applications such as watershed analysis,
+                disaster planning and recovery, and others that implement digital elevation data.
+            </p>
+        </div>
+        <div class="{{ "hide_this" if show != "architecture" else "" }}">
+            <h3>Application Architecture</h3>
+            <p>
+                This application was built entirely using open source software.  The reasons for this was first to eliminate
+                licencing fees but also because this was found to be the best software for the job regardless of price.
+            </p>
+            <p>
+                The Python based Flask web framework was used on the server side.  This is the product of two other open
+                source projects; Werkzueg, a Web Server Gateway Interface and Jinja2, a templating language.  I found this framework
+                to be easy to use and comes with the many benefits of Python (simple syntax, abundance of third party libraries,
+                relative speed, etc.).  Application data is stored in PostgreSQL databases with the PostGIS spatial extension.  The spatial
+                capabilities provided by PostGIS are well beyond that found with the native geometry types in SQL Server or Oracle.
+                SQLAlchemy and GeoAlchemy allow for for higher level interaction with the database than would be possible by simply
+                treating everything as tables and records.  Notably absent is any kind of "GIS Server".  This functionality has been
+                implemented as as asynchronous calls to server with a text representation of the geometry that is used to create
+                or update geometries in the database.  By this, an extra layer of complexity is eliminated and user / project
+                specific data can be returned via the web server interaction with the database.
+            </p>
+            <p>
+                I wanted to avoid using plugins in the browser so everything is done with the readily available features of
+                HTML5 and JavaScript.  OpenLayers (2.13) provides the web mapping capability.  This will be upgraded to version
+                3.0 when at least a beta release becomes available.  Dojo Toolkit was used for functionality such as application
+                layout and grids.  JQuery was useful for a variety of uses but espeically so for it's clean implementation
+                of asynchronous (ajax) requests.
+            </p>
+            <p>
+                The algorithm has yet to be built but the tools with which I plan to do so have been identified.  The elevation model
+                can be read into memory using the Geospatial Data Abstraction Library along with the Python bindings.  A happy coincidence
+                is that the format of the ready elevation data is a numpy array.  Processing of these arrays is much faster than
+                is possible using raster algebra in a desktop GIS environment and has the added benefit of ready implementation into
+                SciPy if more advanced methods should become necessary.
+            </p>
+
+            <p>The structure of the application as well as links to the relevant pages is given below.</p>
+
+
+            <div id='about_logos'>
+                <div>
+                    <h1>Server Side</h1>
+                    <div class='logo_group'>
+                        <h1>Web Framework</h1>
+                        <a href="http://flask.pocoo.org/">
+                            <img src="{{ url_for('static',filename='img/flask_logo.png') }}"
+                                    title="Flask - Python Web Framework"></a>
+                        <div class='side_by_side_logo'>
+                            <a href="http://werkzeug.pocoo.org/">
+                                <img src="{{ url_for('static',filename='img/werkzueg_logo.png') }}"
+                                    title="Werkzueg"></a>
+                        </div>
+                        <div class='side_by_side_logo'>
+                            <a href="http://jinja.pocoo.org/docs/">
+                                <img src="{{ url_for('static',filename='img/jinja_logo.png') }}"
+                                    title="Jinja2 Template Engine"></a>
+                        </div>
+                    </div>
+                    <div class='logo_group'>
+                        <h1>Database</h1>
+                        <div class='side_by_side_logo'>
+                            <a href="http://www.postgresql.org/">
+                                <img src="{{ url_for('static',filename="img/postgresql_logo.png") }}"
+                                        title="PostgreSQL Database"></a>
+                        </div>
+                        <div class='side_by_side_logo'>
+                            <a href="http://postgis.net/">
+                                <img src="{{ url_for('static',filename='img/postgis_logo.png') }}"
+                                        title="PostGIS Spatial Extension"></a>
+                        </div>
+                    </div>
+                    <div class='logo_group'>
+                        <h1>Database Interaction Helper</h1>
+                        <div class='side_by_side_logo'>
+                            <a href="http://www.sqlalchemy.org/">
+                                <img width="40%" src="{{ url_for('static',filename='img/sqlalchemy_logo.png') }}"
+                                        title="SQLAlchemy Database Abstraction Layer"></a>
+                        </div>
+                        <div class='side_by_side_logo'>
+                            <a href="https://geoalchemy-2.readthedocs.org/en/latest/">
+                                <img width="40%" src="{{ url_for('static',filename='img/geoalchemy_logo.png') }}"
+                                        title="Spatial Extensions for SQLAlchemy"></a>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class='logo_group2'>
+                        <h1>Client Side</h1>
+                        <div class='logo_group'>
+                            <h2 style="text-align: center;">Browser Based Mapping</h2>
+                            <a href="http://openlayers.org/">
+                                <img src="{{ url_for('static',filename='img/openlayers_logo.png') }}"
+                                        title="OpenLayers - JavaScript Web Mapping"></a>
+                            <br/>
+                            <br />
+                        </div>
+                        <div class='logo_group'>
+                            <h2>Other JavaScript Libraries</h2>
+                            <a href="http://dojotoolkit.org/">
+                                <img src="{{ url_for('static',filename='img/dojo_logo.png') }}"
+                                        title="Dojo Toolkit"></a>
+                            <br/>
+                            <br/>
+                            <a href="http://jquery.com/">
+                                <img src="{{ url_for('static',filename='img/jquery_logo.png') }}"
+                                        title="JQuery"></a>
+                            <br />
+                            <br />
+                        </div>
+                        <h2>Algorithm Generation</h2>
+                        <div class='logo_group'>
+                            <div class='side_by_side_logo'>
+                                <a href="http://www.gdal.org/">
+                                    <img src="{{ url_for('static',filename='img/gdal_logo.png') }}"
+                                            title="Geospatial Data Abstraction Library"></a>
+                            </div>
+                            <div class='side_by_side_logo'>
+                                <a href="http://www.scipy.org/">
+                                    <img src="{{ url_for('static',filename='img/scipy_logo.png') }}"
+                                            title="Numpy and Scipy"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock main_content %}

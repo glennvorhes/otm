@@ -315,6 +315,10 @@ ExtentLayer.prototype.updateDEM = function(){
         return;
     }
 
+    var loadingIndicator = document.getElementById('loading_gif');
+    if (loadingIndicator)
+        loadingIndicator.style.visibility = '';
+
     var demBounds = this.extentGeom.getBounds();
     var geomClone = this.extentGeom.clone();
 
@@ -339,6 +343,9 @@ ExtentLayer.prototype.updateDEM = function(){
             //display the opacity controller
             if (thisObj.opacityTitlePaneId)
                 document.getElementById(thisObj.opacityTitlePaneId).style.display = 'inherit';
+
+            if (loadingIndicator)
+                loadingIndicator.style.visibility = 'hidden';
 
         },
         error: function (xhr, ajaxOptions, thrownError) {
