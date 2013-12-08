@@ -6,10 +6,6 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 
-@app.route('/ol3')
-def ol3():
-    return render_template('ol3.html')
-
 @app.route('/')
 @app.route('/index')
 def index():

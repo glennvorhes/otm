@@ -20,10 +20,23 @@
               height: 100%;
               margin: 0;
             }
-            #borderContainer {
-              width: 100%;
-              height: 100%;
+
+            #tabContainer{
+                width: 20%;
+                height: 100%;
+                float: left;
             }
+
+            #map_element{
+                width:80%;
+                height: 100%;
+                float: left;
+                position: relative;
+                border: solid lightskyblue 4px;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+
         </style>
 
         <script>
@@ -36,11 +49,7 @@
             var imgURL = "{{ url_for('static',filename='img')}}/";
             var userEmail = "{% if g.user.is_authenticated() %}{{ g.user.email }}{% else %}{{ "" }}{% endif %}";
         </script>
-
-        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
-{#        <script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.js"></script>#}
-{#        <script src='http://openlayers.org/dev/OpenLayers.js'></script>#}
         <script src='{{url_for('static', filename='js/dojo/dojo/dojo.js')}}' djConfig="parseOnLoad: true"></script>
         <script src='{{url_for('static', filename='js/OpenLayers.js')}}'></script>
         <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js') }}"></script>
@@ -48,176 +57,165 @@
 
 {#        Temporary design features#}
         <script src='{{url_for('static', filename='js/tempDesign.js')}}'></script>
-
         <script src='{{url_for('static', filename='js/VectorLayer.js')}}'></script>
         <script src='{{url_for('static', filename='js/ExtentLayer.js')}}'></script>
-        <script src='{{url_for('static', filename='js/__init__.js')}}'></script>
-        <script src='{{url_for('static', filename='js/zoomTo.js')}}'></script>
     </head>
     <body class="soria">
-        <div data-dojo-type="dijit.layout.BorderContainer"
-             data-dojo-props="design:'sidebar', gutters:true, liveSplitters:true" id="borderContainer">
-            <div data-dojo-type="dojox.layout.ExpandoPane" title=""
-                 data-dojo-props="maxWidth:225, splitter:true, region:'leading'"
-                 style="width: 260px;">
-                <div data-dojo-type="dijit.layout.BorderContainer">
-                    <div id='tabContainer' dojoType="dijit.layout.TabContainer" attachParent="true" tabPosition="top"
-                        tabStrip="true" data-dojo-props="region:'center'">
-                        <div id="homeTab" class="roundedCorners" data-dojo-type="dijit.layout.ContentPane" title="Home">
-                            {% if g.user.is_authenticated() %}
-                                <h4>Logged in as user: {{g.user.nickname}}</h4>
-                            {% endif %}
-                            <a href="{{ url_for('index') }}">Home</a><br/>
-                            {% if g.user.is_authenticated() %}
-                                <a href="{{ url_for('getProjects') }}">Projects</a><br/>
-                            {% endif %}
-                            {% if g.user.is_authenticated() %}
-                                <a href="{{ url_for('logout') }}">Logout</a><br/>
-                            {% endif %}
-                            <h4>Project Information</h4>
-                            <table>
-                                <tr><td>Name: </td><td>
-                                    <script>document.write(projectProperties.project_name);</script>
-                                </td></tr>
-                                <tr><td>Type: </td><td>
-                                    <script>document.write(projectProperties.description);</script>
-                                </td></tr>
-                                <tr><td>Created: </td><td>
-                                    <script>document.write(projectProperties.created);</script>
-                                </td></tr>
-                                <tr><td>Modified: </td><td>
-                                    <script>document.write(projectProperties.last_modfied);</script>
-                                </td></tr>
-                            </table>
-                        </div>
-                        <div id='inputsTab' data-dojo-type="dijit.layout.AccordionContainer" title="Inputs">
-                            <div id="findProjAreaPane" data-dojo-type="dijit.layout.ContentPane"
-                                 onhide='app.extentLayer.deactivateAll();' data-dojo-props="title:'Set Project Extent'">
-                                <input type="radio" onchange="DDDegMinOnChange();" name="LatLongEntryMethod"
-                                       value="googleSearch" id="LocSearch" checked="checked"/>
-                                        <label for="LocSearch">Location Search</label><br/>
-                                <input type="radio" onchange="DDDegMinOnChange();" name="LatLongEntryMethod"
-                                       value="DD"  id="DD"/><label for="DD">Decimal Degrees</label><br/>
-                                <input type="radio" onchange="DDDegMinOnChange();" name="LatLongEntryMethod"
-                                       value="DegMin" id="DegMin"/><label for="DegMin">Degrees, Minutes</label>
-                                <br />
-                                <!--Google Search Fields-->
-                                <p id="GoogLocSearch" class="formfield">
-                                    <label>Location</label><br />
-                                    <input type="text" id="textSearch" style="width: 205px"/>
-                                </p>
-                                <!--DD Fields -->
-                                <p id="DDFieldset" class="formfield" style="display: none;">
-                                    <label>Lat: </label>
-                                    <span style="position:absolute; left: 52px; margin: 2px;">
-                                    <input type="number" id="inputLatDD" name="inputDD" value="" style="width: 65px;"/>&deg;
-                                    <select id="DDLatSelect" class="hemisphereSelect">
-                                        <option value="1">N</option>
-                                        <option value="-1">S</option>
-                                    </select>
-                                    </span>
-                                    <br />
-                                    <label >Long: </label>
-                                    <span style="position:absolute; left: 52px; margin: 2px;">
-                                    <input type="number" id="inputLonDD" name="inputDD" value="" style="width: 65px"/>&deg;
-                                    <select id="DDLonSelect" class="hemisphereSelect">
-                                        <option value="-1">W</option>
-                                        <option value="1">E</option>
-                                    </select>
-                                    </span>
-                                </p>
-                                <!--Deg Min Fields-->
-                                <p id="DegMinFieldSet" class="formfield" style="display: none;">
-                                    <label>Lat: </label>
-                                    <span style="position:absolute; left: 52px; margin: 2px;">
-                                    <input type="number" id="inputLatDeg" name="inputLatDeg" value="" style="width: 25px"/>&deg;&nbsp;
-                                    <input type="number" id="inputLatMin" name="inputLatMin" value="" style="width: 25px"/>&lsquo;&nbsp;
-                                    <select id="DegMinLatSelect" class="hemisphereSelect">
-                                        <option value="1">N</option>
-                                        <option value="-1">S</option>
-                                    </select>
-                                    </span>
-                                    <br />
-                                    <label>Long: </label>
-                                    <span style="position:absolute; left: 52px; margin: 2px;">
-                                    <input type="number" id="inputLonDeg" name="inputLatDeg" value="" style="width: 25px" />&deg;&nbsp;
-                                    <input type="number" id="inputLonMin" name="inputLatMin" value="" style="width: 25px"/>&lsquo;&nbsp;
-                                    <select id="DegMinLonSelect" class="hemisphereSelect">
-                                        <option value="-1">W</option>
-                                        <option value="1">E</option>
-                                    </select>
-                                    </span><br />
-                                </p>
-                                <!-- Submit Fields-->
-                                <input type="button" value="Zoom To Location" onclick="zoomToLocation();" /><br />
-                                <label id="zoomToError" style="color:red;">&nbsp;</label><br />
-                                <input type="radio" id="DONE_set_extent_radio" name="set_extent_radio" checked="checked"
-                                         style='display: none;'/>
-                                <label for="DONE_set_extent_radio">
-                                    <img src="{{ url_for('static', filename='img/icons/DONE_on.png') }}"
-                                            alt="Set Extent Done" title='Deactivate Extent Tools'
-                                            id='DONE_set_extent_radio_imgLabel' style='margin: 3px;'>
-                                </label>
-                                <input type="radio" id="POLYGON_set_extent_radio" name="set_extent_radio"
-                                        style='display: none;'/>
-                                <label for="POLYGON_set_extent_radio">
-                                    <img src="{{ url_for('static', filename='img/icons/POLYGON_off.png') }}"
-                                            alt="Set Extent"  title='Draw Extent Feature'
-                                            id='POLYGON_set_extent_radio_imgLabel' style='margin: 3px;'>
-                                </label>
-                                <input type="radio" id="MODIFY_set_extent_radio" name="set_extent_radio"
-                                         style='display: none;'/>
-                                <label for="MODIFY_set_extent_radio">
-                                    <img src="{{ url_for('static', filename='img/icons/MODIFY_off.png') }}"
-                                            alt="Set Extent" title='Modify existing extent'
-                                            id='MODIFY_set_extent_radio_imgLabel' style='margin: 3px;'>
-                                </label>
-                                <img src="{{ url_for('static', filename='img/icons/DELETE_on.png') }}"
-                                    alt="Del Extent" title='Clear extent' style='margin: 3px;'
-                                        id="CLEAR_set_extent_radio">
-                                <br/>
-                            </div>
-                        </div>
-                        <div id="designTab" class="roundedCorners" data-dojo-type="dijit.layout.AccordionContainer"
-                             title="Design"
-                             onshow="for (var key in app.layers){app.layers[key].vectorLayer.setVisibility(false);}"
-                             onhide="for (var key in app.layers){app.layers[key].vectorLayer.setVisibility(true);}">
-                            <p style="width:280px;">Design has not yet been generated</p>
-                        </div>
-                    </div>
+        <div id='tabContainer' dojoType="dijit.layout.TabContainer" tabPosition="top" tabStrip="true" >
+            <div id="homeTab" class="roundedCorners" data-dojo-type="dijit.layout.ContentPane" title="Home">
+                {% if g.user.is_authenticated() %}
+                    <h4>Logged in as user: {{g.user.nickname}}</h4>
+                {% endif %}
+                <a href="{{ url_for('index') }}">Home</a><br/>
+                {% if g.user.is_authenticated() %}
+                    <a href="{{ url_for('getProjects') }}">Projects</a><br/>
+                {% endif %}
+                {% if g.user.is_authenticated() %}
+                    <a href="{{ url_for('logout') }}">Logout</a><br/>
+                {% endif %}
+                <h4>Project Information</h4>
+                <table>
+                    <tr><td>Name: </td><td>
+                        <script>document.write(projectProperties.project_name);</script>
+                    </td></tr>
+                    <tr><td>Type: </td><td>
+                        <script>document.write(projectProperties.description);</script>
+                    </td></tr>
+                    <tr><td>Created: </td><td>
+                        <script>document.write(projectProperties.created);</script>
+                    </td></tr>
+                    <tr><td>Modified: </td><td>
+                        <script>document.write(projectProperties.last_modfied);</script>
+                    </td></tr>
+                </table>
+            </div>
+            <div id='inputsTab' data-dojo-type="dijit.layout.AccordionContainer" title="Inputs">
+                <div id="findProjAreaPane" data-dojo-type="dijit.layout.ContentPane"
+                     onhide='app.extentLayer.deactivateAll();' data-dojo-props="title:'Set Project Extent'">
+                    <input type="radio" onchange="DDDegMinOnChange();" name="LatLongEntryMethod"
+                           value="googleSearch" id="LocSearch" checked="checked"/>
+                            <label for="LocSearch">Location Search</label><br/>
+                    <input type="radio" onchange="DDDegMinOnChange();" name="LatLongEntryMethod"
+                           value="DD"  id="DD"/><label for="DD">Decimal Degrees</label><br/>
+                    <input type="radio" onchange="DDDegMinOnChange();" name="LatLongEntryMethod"
+                           value="DegMin" id="DegMin"/><label for="DegMin">Degrees, Minutes</label>
+                    <br />
+                    <!--Google Search Fields-->
+                    <p id="GoogLocSearch" class="formfield">
+                        <label>Location</label><br />
+                        <input type="text" id="textSearch" style="width: 205px"/>
+                    </p>
+                    <!--DD Fields -->
+                    <p id="DDFieldset" class="formfield" style="display: none;">
+                        <label>Lat: </label>
+                        <span style="position:absolute; left: 52px; margin: 2px;">
+                        <input type="number" id="inputLatDD" name="inputDD" value="" style="width: 65px;"/>&deg;
+                        <select id="DDLatSelect" class="hemisphereSelect">
+                            <option value="1">N</option>
+                            <option value="-1">S</option>
+                        </select>
+                        </span>
+                        <br />
+                        <label >Long: </label>
+                        <span style="position:absolute; left: 52px; margin: 2px;">
+                        <input type="number" id="inputLonDD" name="inputDD" value="" style="width: 65px"/>&deg;
+                        <select id="DDLonSelect" class="hemisphereSelect">
+                            <option value="-1">W</option>
+                            <option value="1">E</option>
+                        </select>
+                        </span>
+                    </p>
+                    <!--Deg Min Fields-->
+                    <p id="DegMinFieldSet" class="formfield" style="display: none;">
+                        <label>Lat: </label>
+                        <span style="position:absolute; left: 52px; margin: 2px;">
+                        <input type="number" id="inputLatDeg" name="inputLatDeg" value="" style="width: 25px"/>&deg;&nbsp;
+                        <input type="number" id="inputLatMin" name="inputLatMin" value="" style="width: 25px"/>&lsquo;&nbsp;
+                        <select id="DegMinLatSelect" class="hemisphereSelect">
+                            <option value="1">N</option>
+                            <option value="-1">S</option>
+                        </select>
+                        </span>
+                        <br />
+                        <label>Long: </label>
+                        <span style="position:absolute; left: 52px; margin: 2px;">
+                        <input type="number" id="inputLonDeg" name="inputLatDeg" value="" style="width: 25px" />&deg;&nbsp;
+                        <input type="number" id="inputLonMin" name="inputLatMin" value="" style="width: 25px"/>&lsquo;&nbsp;
+                        <select id="DegMinLonSelect" class="hemisphereSelect">
+                            <option value="-1">W</option>
+                            <option value="1">E</option>
+                        </select>
+                        </span><br />
+                    </p>
+                    <!-- Submit Fields-->
+                    <input type="button" value="Zoom To Location" onclick="zoomToLocation();" /><br />
+                    <label id="zoomToError" style="color:red;">&nbsp;</label><br />
+                    <input type="radio" id="DONE_set_extent_radio" name="set_extent_radio" checked="checked"
+                             style='display: none;'/>
+                    <label for="DONE_set_extent_radio">
+                        <img src="{{ url_for('static', filename='img/icons/DONE_on.png') }}"
+                                alt="Set Extent Done" title='Deactivate Extent Tools'
+                                id='DONE_set_extent_radio_imgLabel' style='margin: 3px;'>
+                    </label>
+                    <input type="radio" id="POLYGON_set_extent_radio" name="set_extent_radio"
+                            style='display: none;'/>
+                    <label for="POLYGON_set_extent_radio">
+                        <img src="{{ url_for('static', filename='img/icons/POLYGON_off.png') }}"
+                                alt="Set Extent"  title='Draw Extent Feature'
+                                id='POLYGON_set_extent_radio_imgLabel' style='margin: 3px;'>
+                    </label>
+                    <input type="radio" id="MODIFY_set_extent_radio" name="set_extent_radio"
+                             style='display: none;'/>
+                    <label for="MODIFY_set_extent_radio">
+                        <img src="{{ url_for('static', filename='img/icons/MODIFY_off.png') }}"
+                                alt="Set Extent" title='Modify existing extent'
+                                id='MODIFY_set_extent_radio_imgLabel' style='margin: 3px;'>
+                    </label>
+                    <img src="{{ url_for('static', filename='img/icons/DELETE_on.png') }}"
+                        alt="Del Extent" title='Clear extent' style='margin: 3px;'
+                            id="CLEAR_set_extent_radio">
+                    <br/>
                 </div>
             </div>
-            <div id='map_element' data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center'">
-                <span id='mapcoordinates' style="position: absolute; bottom: 5px; left:5px; z-index: 999;">coords</span>
-                <div id='demOpacityTitleContainer' style="display: none; position: absolute; left:50px; top:2px; z-index:999; width:200px;">
-                    <div id='demOpacityTitle' data-dojo-type="dijit.TitlePane"
-                        data-dojo-props="title:'Show Elevation', closable:false, open:false, region:'center'"
-                        onMouseLeave="var demOp = dijit.byId('demOpacityTitle'); if (demOp.open) demOp.toggle()">
-                        <div data-dojo-type="dijit.layout.ContentPane" style="width:200px; height:60px; overflow:auto">
-                            <div id="opacitySliderConentDiv">
-                                <div id="demOpacitySlider"
-                                    style="width:160px;"
-                                    data-dojo-type="dijit/form/HorizontalSlider"
-                                    data-dojo-props='value:0, minimum: 0, maximum:100,
-                                    showButtons:true,
-                                    intermediateChanges:false,
-                                    discreteValues: 5,
-                                    disabled:false'>
-                                    <div data-dojo-type="dijit/form/HorizontalRule" container="bottomDecoration"
-                                        count=5 style="height:5px;"></div>
-                                    <ol data-dojo-type="dijit/form/HorizontalRuleLabels" container="bottomDecoration"
-                                        style="height:1em;font-size:75%;color:gray;">
-                                        <li>0%</li>
-                                        <li>50%</li>
-                                        <li>100%</li>
-                                    </ol>
-                                </div>
+            <div id="designTab" class="roundedCorners" data-dojo-type="dijit.layout.AccordionContainer"
+                 title="Design"
+                 onshow="for (var key in app.layers){app.layers[key].vectorLayer.setVisibility(false);}"
+                 onhide="for (var key in app.layers){app.layers[key].vectorLayer.setVisibility(true);}">
+                <p style="width:280px;">Design has not yet been generated</p>
+            </div>
+        </div>
+        <div id='map_element'>
+            <span id='mapcoordinates' style="padding: 1px 5px; position: absolute; bottom: 4px; left:80px; color: #d3d3d3; z-index: 999; border-radius: 4px; border: solid white 1px; background-color: black;"></span>
+            <div id='demOpacityTitleContainer' style="display: none; position: absolute; left:50px; top:2px; z-index:999; width:200px;">
+                <div id='demOpacityTitle' data-dojo-type="dijit.TitlePane"
+                    data-dojo-props="title:'Show Elevation', closable:false, open:false, region:'center'"
+                    onMouseLeave="var demOp = dijit.byId('demOpacityTitle'); if (demOp.open) demOp.toggle()">
+                    <div data-dojo-type="dijit.layout.ContentPane" style="width:200px; height:60px; overflow:auto">
+                        <div id="opacitySliderConentDiv">
+                            <div id="demOpacitySlider"
+                                style="width:160px;"
+                                data-dojo-type="dijit/form/HorizontalSlider"
+                                data-dojo-props='value:0, minimum: 0, maximum:100,
+                                showButtons:true,
+                                intermediateChanges:false,
+                                discreteValues: 5,
+                                disabled:false'>
+                                <div data-dojo-type="dijit/form/HorizontalRule" container="bottomDecoration"
+                                    count=5 style="height:5px;"></div>
+                                <ol data-dojo-type="dijit/form/HorizontalRuleLabels" container="bottomDecoration"
+                                    style="height:1em;font-size:75%;color:gray;">
+                                    <li>0%</li>
+                                    <li>50%</li>
+                                    <li>100%</li>
+                                </ol>
                             </div>
-                            <span style="color: gray;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set Opacity</span>
                         </div>
+                        <span style="color: gray;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set Opacity</span>
                     </div>
                 </div>
             </div>
         </div>
+        <script src='{{url_for('static', filename='js/__init__.js')}}'></script>
+        <script src='{{url_for('static', filename='js/zoomTo.js')}}'></script>
     </body>
 </html>

@@ -26,8 +26,6 @@ var app = {layers:{},
 
 //Project setup, called on dojo.ready, Create Layers, Panels, Layer Specific Event Listeners
 function setupProject(){
-
-
     //Accordion pane must be visible to add content panes
     dijit.byId('tabContainer').selectChild('inputsTab');
     var fidWidth = '35px';
@@ -210,5 +208,13 @@ dojo.ready(function () {
             alert(xhr.status);
             alert(thrownError);
         }
+    });
+
+    map.events.register("mousemove", map, function (e) {
+        var point;
+        point = map.getLonLatFromPixel(this.events.getMousePosition(e))
+            .transform(new OpenLayers.Projection("EPSG:3857"), new OpenLayers.Projection("EPSG:4326"));
+
+        $('#mapcoordinates').html(point.lat.toFixed(5) + "&deg, " + point.lon.toFixed(5) + "&deg");
     });
 });
