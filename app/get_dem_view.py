@@ -7,6 +7,8 @@ import os
 import uuid
 import io
 import shutil
+from osgeo import gdal, gdalconst
+
 
 @app.route('/getdem')
 def getDem():
@@ -57,19 +59,131 @@ def getDem():
         return 'geom too big'
 
     query = "SELECT \
-        ST_AsPNG(\
-            ST_Transform(\
-                ST_Clip(\
-                    ST_Union(rast),ST_GeomFromText('{0}', {1}), true)\
-                ,{2})\
-            )\
-        FROM aster_gdem \
-        WHERE ST_Intersects(rast, ST_GeomFromText('{0}', {1}));".format(geom_wkt, in_srid, out_srid)
+                ST_AsGDALRaster(\
+                    ST_Transform(\
+                        ST_Clip(\
+                            ST_Union(rast),ST_GeomFromText('{0}', {1}),\
+                        true),\
+                    {2}),\
+                'GTiff')\
+                FROM aster_gdem \
+                WHERE ST_Intersects(\
+                    rast, ST_GeomFromText('{0}', {1})\
+                );".format(geom_wkt, in_srid, out_srid)
 
+    print query
     cur.execute(query)
     img_buffer = cur.fetchone()[0]
     print type(img_buffer)
     conn.close()
+
+    # return str(img_buffer)
+
+    gdal.FileFromMemBuffer('/vsimem/pnginmem', str(img_buffer))
+    # print 'here1'
+
+    # Open the in-memory file
+    in_dataset = gdal.Open('/vsimem/pnginmem')
+
+    if in_dataset is None:
+        print 'Could not open '
+        # sys.exit(1)
+    else:
+        print 'opened'
+
+    cols = in_dataset.RasterXSize
+    rows = in_dataset.RasterYSize
+    bands = in_dataset.RasterCount
+
+    data_red = in_dataset.GetRasterBand(1).ReadAsArray(0, 0, cols, rows)
+    data_grn = in_dataset.GetRasterBand(2).ReadAsArray(0, 0, cols, rows)
+    data_blu = in_dataset.GetRasterBand(3).ReadAsArray(0, 0, cols, rows)
+
+    # out_dataset = gdal.GetDriverByName('MEM').Create('inMem', cols, rows, 1, gdalconst.GDT_Byte)
+    f_name = '/home/glenn/Desktop/out16.tif'
+
+    out_dataset = gdal.GetDriverByName('GTiff').Create(f_name, cols, rows, 1, gdalconst.GDT_Float32)
+
+    data_float = data_grn.astype(float)
+    data_float += data_red * 256.0 + data_blu / 256.0
+    # print data_float[]
+
+    # data_grn *= 5
+    # data_grn = data_grn.astype(float)
+    #
+
+    out_band1 = out_dataset.GetRasterBand(1)
+    out_band1.WriteArray(data_float, 0, 0)
+    out_band1.SetNoDataValue(0)
+    out_band1.FlushCache()
+    out_band1.GetStatistics(0, 1)
+
+    # gdal.GetDriverByName('GTiff').CreateCopy('/home/glenn/Desktop/dem2.tif'), out_dataset))
+    # dst_ds = gdal.GetDriverByName('GTiff').CreateCopy('/home/glenn/Desktop/out12.tif', out_dataset)
+
+    out_dataset.SetGeoTransform(in_dataset.GetGeoTransform())
+    out_dataset.SetProjection(in_dataset.GetProjection())
+
+    in_dataset = None
+    dst_ds = None
+    out_dataset = None
+    out_band1 = None
+         #
+
+    # b1 = np.floor(dataFloat / 256.0).astype(int)
+    # b2 = np.floor(dataFloat % 256.0).astype(int)
+    # b3 = np.round((dataFloat % 1) * 256.0).astype(int)
+
+
+
+
+    # band = in_dataset.GetRasterBand(1)
+    #
+    # data = band.ReadAsArray(0, 0, cols, rows)
+    #
+    # dataFloat = data.astype(float)
+
+    # b1 = np.floor(dataFloat / 256.0).astype(int)
+    # b2 = np.floor(dataFloat % 256.0).astype(int)
+    # b3 = np.round((dataFloat % 1) * 256.0).astype(int)
+    #
+    # # Adjust case where b3 rounds to 256
+    # adjustB3 = (b3 > 255).astype(int)
+    # b3 -= adjustB3
+    # b2 += adjustB3
+    #
+    # # Need to check b2 as well now
+    # adjustB2 = (b2 > 255).astype(int)
+    # b2 -= adjustB2
+    # b1 += adjustB2
+    #
+    # outDataset = gdal.GetDriverByName('MEM').Create('inMem', cols, rows, 3, gdalconst.GDT_Byte)
+    #
+    # outDataset.SetGeoTransform(inDataset.GetGeoTransform())
+    # outDataset.SetProjection(inDataset.GetProjection())
+    #
+    # outBand1 = outDataset.GetRasterBand(1)
+    # outBand1.WriteArray(b1, 0, 0)
+    # outBand2 = outDataset.GetRasterBand(2)
+    # outBand2.WriteArray(b2, 0, 0)
+    # outBand3 = outDataset.GetRasterBand(3)
+    # outBand3.WriteArray(b3, 0, 0)
+    #
+    # gdal.GetDriverByName('PNG').CreateCopy(outputFile, outDataset)
+    #
+    # inDataset = None
+    # outDataset = None
+
+    # gdal.GetDriverByName('GTiff').CreateCopy('/home/glenn/Desktop/out.tif', in_dataset)
+
+    # return 'hatter1'
+
+
+
+
+
+
+
 
     # default case, return the png image to the client
     if out_format == 'imagepng':
@@ -90,41 +204,7 @@ def getDem():
         temp_folder = os.path.join(unique_temp_directory, 'demDownload')
         os.makedirs(temp_folder)
 
-        conn = psycopg2.connect(ConnStringDEM_DB)
-        cur = conn.cursor()
-
-        query = "SELECT \
-            ST_MetaData(\
-                ST_Transform(\
-                    ST_Clip(\
-                        ST_Union(rast),ST_GeomFromText('{0}', {1}), true)\
-                    ,{2})\
-                )\
-            FROM aster_gdem \
-            WHERE ST_Intersects(rast, ST_GeomFromText('{0}', {1}));".format(geom_wkt, in_srid, out_srid)
-
-        cur.execute(query)
-        meta_string = cur.fetchone()[0]
-
-        meta_string = meta_string.replace('(', '').replace(')', '')
-        meta_list = meta_string.split(',')
-
-        query = 'select srtext from spatial_ref_sys where auth_srid = {0}'.format(meta_list[8])
-        cur.execute(query)
-        proj_string = cur.fetchone()[0]
-        conn.close()
-
-        aux_xml = '<PAMDataset><SRS>{0}</SRS>\
-<GeoTransform>{1:E},  {2:E},  {3:E},  {4:E},  {5:E}, {6:E}</GeoTransform>\
-<Metadata domain="IMAGE_STRUCTURE"><MDI key="INTERLEAVE">PIXEL</MDI></Metadata>\
-</PAMDataset>'.format(proj_string, float(meta_list[0]), float(meta_list[4]), float(meta_list[6]),
-                      float(meta_list[1]), float(meta_list[7]), float(meta_list[5]))
-
-        with io.open(os.path.join(temp_folder, 'dem.png'), 'wb') as img_file:
-            img_file.write(str(img_buffer))
-
-        with io.open(os.path.join(temp_folder, 'dem.png.aux.xml'), 'wb') as aux_file:
-            aux_file.write(str(aux_xml))
+        gdal.GetDriverByName('GTiff').CreateCopy(os.path.join(temp_folder, 'dem.tif'), in_dataset)
 
         zip_file_out = os.path.join(unique_temp_directory, 'demDownload')
         shutil.make_archive(zip_file_out, format="zip", root_dir=temp_folder)
@@ -132,16 +212,6 @@ def getDem():
 
         # return send_from_directory(zip_file_out, "demDownload.zip")
         return send_file(zip_file_out, mimetype='application/zip', as_attachment='demDownload.zip')
-
-        # zipFilePath = os.path.join(unique_temp_directory, 'demDownload.zip')
-        # zip = zipfile.ZipFile(zipFilePath, 'w', zipfile.ZIP_DEFLATED)
-        # for file in os.listdir(temp_folder):
-        #     zip.write(os.path.join(temp_folder, file))
-        # zip.close()
-
-        # return aux_xml
-        # return 'not yet implemented'
-        # if out_format is  base64png is true, return the base64 representation of the raster
 
     else:
         return "url parameter error"
