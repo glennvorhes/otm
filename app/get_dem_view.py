@@ -5,49 +5,49 @@ from config import ConnStringDEM_DB
 import base64
 import os
 import uuid
-import io
+# import io
 import shutil
 from osgeo import gdal, gdalconst
 from subprocess import Popen
-from PIL import Image as PImage
-from PIL import ImageOps
+# from PIL import Image as PImage
+# from PIL import ImageOps
 
 
-def make_transparent_hillshade(input_file, output_file):
-    # Load the source file
-    src = PImage.open(input_file)
-
-    # Convert to single channel
-    grey = ImageOps.grayscale(src)
-
-    # Make negative image
-    neg = ImageOps.invert(grey)
-
-    # Split channels
-    bands = neg.split()
-
-    # Create a new (black) image
-    black = PImage.new('RGBA', src.size)
-
-    # Copy inverted source into alpha channel of black image
-    black.putalpha(bands[0])
-
-    # Return a pixel access object that can be used to read and modify pixels
-    pixdata = black.load()
-
-    # Loop through image data
-    for y in xrange(black.size[1]):
-        for x in xrange(black.size[0]):
-            # Replace black pixels with pure transparent
-            if pixdata[x, y] == (0, 0, 0, 255):
-                pixdata[x, y] = (0, 0, 0, 0)
-            # Lighten pixels slightly
-            else:
-                a = pixdata[x, y]
-                pixdata[x, y] =  a[:-1] + (a[-1]-74,)
-
-    # Save as PNG
-    black.save(output_file, "png")
+# def make_transparent_hillshade(input_file, output_file):
+#     # Load the source file
+#     src = PImage.open(input_file)
+#
+#     # Convert to single channel
+#     grey = ImageOps.grayscale(src)
+#
+#     # Make negative image
+#     neg = ImageOps.invert(grey)
+#
+#     # Split channels
+#     bands = neg.split()
+#
+#     # Create a new (black) image
+#     black = PImage.new('RGBA', src.size)
+#
+#     # Copy inverted source into alpha channel of black image
+#     black.putalpha(bands[0])
+#
+#     # Return a pixel access object that can be used to read and modify pixels
+#     pixdata = black.load()
+#
+#     # Loop through image data
+#     for y in xrange(black.size[1]):
+#         for x in xrange(black.size[0]):
+#             # Replace black pixels with pure transparent
+#             if pixdata[x, y] == (0, 0, 0, 255):
+#                 pixdata[x, y] = (0, 0, 0, 0)
+#             # Lighten pixels slightly
+#             else:
+#                 a = pixdata[x, y]
+#                 pixdata[x, y] =  a[:-1] + (a[-1]-74,)
+#
+#     # Save as PNG
+#     black.save(output_file, "png")
 
 @app.route('/getdem')
 def getDem():
@@ -229,7 +229,7 @@ def getDem():
 
     hillshade_process.wait()
 
-    make_transparent_hillshade(hillshade_png_path, hillshade_transparent_png_path)
+    # make_transparent_hillshade(hillshade_png_path, hillshade_transparent_png_path)
 
     # Be sure the color gradient process has finished
     color_gradient_process.wait()
