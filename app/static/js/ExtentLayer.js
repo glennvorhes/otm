@@ -66,12 +66,13 @@ function ExtentLayer(olMap, projectConfig, radioButtonTagName, publicExample, op
     document.getElementById('CLEAR_' + radioButtonTagName).onclick =
         function(evt){thisObj.clearExtent();};
 
+    //Add listener for slider change
     dijit.byId(opacitySliderId).onChange = function(val){
-        if (!thisObj.demImage){
-            return;
+        if (thisObj.demGradient){
+            thisObj.demGradient.setOpacity(val / 100);
         }
-        else{
-            thisObj.demImage.setOpacity(val / 100);
+        if (thisObj.demHillshade){
+            thisObj.demHillshade.setOpacity((val / 100) * 3 / 4);
         }
     };
     this.deactivateAll();
@@ -304,10 +305,17 @@ ExtentLayer.prototype.updateDEM = function(){
     //hide the opacity slider
     if (this.opacityTitlePaneId)
         document.getElementById(this.opacityTitlePaneId).style.display = 'none';
-    if (this.demImage) {
-        olMap.removeLayer(this.demImage);
-        this.demImage.destroy();
-        this.demImage = null;
+
+    if (this.demGradient) {
+        olMap.removeLayer(this.demGradient);
+        this.demGradient.destroy();
+        this.demGradient = null;
+    }
+
+    if (this.demHillshade) {
+        olMap.removeLayer(this.demHillshade);
+        this.demHillshade.destroy();
+        this.demHillshade = null;
     }
 
     //bail out if geometry hasn't been set
@@ -332,21 +340,33 @@ ExtentLayer.prototype.updateDEM = function(){
         type: 'GET',
         data: {},
         success: function (response) {
-            thisObj.demImage = new OpenLayers.Layer.Image(
-                'DEM', 'data:image/png;base64,' + response, demBounds, new OpenLayers.Size(1, 1) ,{isBaseLayer:false});
-            var demOpacity = parseFloat(dijit.byId(thisObj.opacitySlider).value) / 100;
-            thisObj.demImage.setOpacity(demOpacity);
-            olMap.addLayer(thisObj.demImage);
+            var responseJSON = JSON.parse(response);
 
-            olMap.setLayerZIndex(thisObj.demImage, 0);
+            thisObj.demGradient = new OpenLayers.Layer.Image(
+                'Elevation Model', 'data:image/png;base64,' + responseJSON['color_gradient_base64'], demBounds, new OpenLayers.Size(1, 1) ,{isBaseLayer:false});
+
+            thisObj.demHillshade = new OpenLayers.Layer.Image(
+                'Elevation Hillshade', 'data:image/png;base64,' + responseJSON['transparent_hillshade_base64'], demBounds, new OpenLayers.Size(1, 1) ,{isBaseLayer:false});
+
+            var demOpacity = parseFloat(dijit.byId(thisObj.opacitySlider).value) / 100;
+            thisObj.demGradient.setOpacity(demOpacity);
+            thisObj.demHillshade.setOpacity(demOpacity * 3 / 4);
+
+            olMap.addLayer(thisObj.demGradient);
+            olMap.addLayer(thisObj.demHillshade);
+
+
+            olMap.setLayerZIndex(thisObj.demHillshade, 0);
+            olMap.setLayerZIndex(thisObj.demGradient, 0);
 
             //display the opacity controller
-            if (thisObj.opacityTitlePaneId)
+            if (thisObj.opacityTitlePaneId){
                 document.getElementById(thisObj.opacityTitlePaneId).style.display = 'inherit';
+            }
 
-            if (loadingIndicator)
+            if (loadingIndicator){
                 loadingIndicator.style.visibility = 'hidden';
-
+            }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             alert(xhr.status);
