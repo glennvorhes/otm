@@ -116,13 +116,12 @@ def getDem():
     print type(img_buffer)
     conn.close()
 
-    # return str(img_buffer)
-
-    gdal.FileFromMemBuffer('/vsimem/pnginmem', str(img_buffer))
+    in_memory_img_path = os.path.join('/vsimem', str(uuid.uuid1()))
+    gdal.FileFromMemBuffer(in_memory_img_path, str(img_buffer))
     # print 'here1'
 
     # Open the in-memory file
-    database_out_png_dataset = gdal.Open('/vsimem/pnginmem')
+    database_out_png_dataset = gdal.Open(in_memory_img_path)
 
     if database_out_png_dataset is None:
         print 'Could not open '
@@ -199,6 +198,7 @@ def getDem():
     dem_dataset.SetGeoTransform(input_dataset_geotrans)
     dem_dataset.SetProjection(database_out_png_dataset.GetProjection())
 
+    gdal.Unlink(in_memory_img_path)
     database_out_png_dataset = None
     dem_dataset = None
     out_band1 = None
@@ -223,7 +223,7 @@ def getDem():
 
     color_gradient_process = Popen(color_gradient_process_args, shell=True)
 
-    hillshade_process_args = 'gdaldem hillshade {0} {1} -of PNG -z 2 -co "TFW=YES"'.format(dem_tif_resample_path, hillshade_png_path)
+    hillshade_process_args = 'gdaldem hillshade {0} {1} -of PNG -z 2'.format(dem_tif_resample_path, hillshade_png_path)
 
     hillshade_process = Popen(hillshade_process_args, shell=True)
 
