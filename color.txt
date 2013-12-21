@@ -1,0 +1,13 @@
+100% white
+90% grey
+80% blue
+70% aqua
+60% green
+50% yellow
+40% orange
+30% brown
+20% purple
+10% indigo
+0% magenta
+nv 0 0 0 0
+
