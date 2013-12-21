@@ -1,18 +1,20 @@
-from flask import render_template, request, make_response, send_file
-from app import app, tempZipDir
+from flask import render_template, request, send_file
+from app import app
 import psycopg2
 from config import ConnStringDEM_DB
 import base64
 import os
 import uuid
-# import io
 import shutil
 from osgeo import gdal, gdalconst
 from subprocess import Popen
+from datetime import datetime, timedelta
+from config import basedir, tempZipDir
+import thread
+
+# import io
 # from PIL import Image as PImage
 # from PIL import ImageOps
-
-
 # def make_transparent_hillshade(input_file, output_file):
 #     # Load the source file
 #     src = PImage.open(input_file)
@@ -49,8 +51,24 @@ from subprocess import Popen
 #     # Save as PNG
 #     black.save(output_file, "png")
 
+def delete_temp_files(the_directory):
+    time_minus_30_min = datetime.now() - timedelta(minutes=30)
+
+    for temp_folder in os.listdir(the_directory):
+        temp_folder_path = os.path.join(the_directory, temp_folder)
+        directory_time = datetime.fromtimestamp(os.path.getmtime(temp_folder_path))
+        if directory_time < time_minus_30_min:
+            try:
+                shutil.rmtree(temp_folder_path)
+            except:
+                pass
+
+
 @app.route('/getdem')
 def getDem():
+    # delete old stuff
+    thread.start_new_thread(delete_temp_files, (tempZipDir))
+
     has_error = False
     out_srid = request.args.get('outsrid', '4326')
     in_srid = request.args.get('insrid', '4326')
@@ -110,28 +128,23 @@ def getDem():
                     rast, ST_GeomFromText('{0}', {1})\
                 );".format(geom_wkt, in_srid, out_srid)
 
-    print query
     cur.execute(query)
     img_buffer = cur.fetchone()[0]
-    print type(img_buffer)
     conn.close()
 
+    # create the in memory image
     in_memory_img_path = os.path.join('/vsimem', str(uuid.uuid1()))
     gdal.FileFromMemBuffer(in_memory_img_path, str(img_buffer))
-    # print 'here1'
 
     # Open the in-memory file
     database_out_png_dataset = gdal.Open(in_memory_img_path)
 
     if database_out_png_dataset is None:
-        print 'Could not open '
         return 'Could not open'
-    else:
-        print 'opened'
 
     cols = database_out_png_dataset.RasterXSize
     rows = database_out_png_dataset.RasterYSize
-    num_bands = database_out_png_dataset.RasterCount
+    # num_bands = database_out_png_dataset.RasterCount
 
     data_red = database_out_png_dataset.GetRasterBand(1).ReadAsArray(0, 0, cols, rows)
     data_grn = database_out_png_dataset.GetRasterBand(2).ReadAsArray(0, 0, cols, rows)
@@ -146,15 +159,8 @@ def getDem():
     dem_tif_path = os.path.join(temp_folder, 'dem_raw_resolution.tif')
     dem_tif_resample_path = os.path.join(temp_folder, 'dem_resample.tif')
     hillshade_png_path = os.path.join(temp_folder, 'hillshade.png')
-    hillshade_transparent_png_path = os.path.join(temp_folder, 'hillshade_transparent.png')
     color_gradient_png_path = os.path.join(temp_folder, 'color_gradient.png')
-    color_gradient_txt_path = os.path.join(tempZipDir, 'color.txt')
-
-    # gdal.GetDriverByName('GTiff').CreateCopy(os.path.join(temp_folder, 'dem.tif'), in_dataset)
-    #
-    # zip_file_out = os.path.join(unique_temp_directory, 'demDownload')
-    # shutil.make_archive(zip_file_out, format="zip", root_dir=temp_folder)
-    # zip_file_out += '.zip'
+    color_gradient_txt_path = os.path.join(basedir, 'color.txt')
 
     dem_dataset = gdal.GetDriverByName('GTiff').Create(dem_tif_path, cols, rows, 1, gdalconst.GDT_Float32)
 
@@ -164,15 +170,18 @@ def getDem():
     # Add values from red and blue bands with appropriate conversion
     data_float += data_red * 256.0 + data_blu / 256.0
 
+    # write the array to the band and flush statistics
     out_band1 = dem_dataset.GetRasterBand(1)
     out_band1.WriteArray(data_float, 0, 0)
     out_band1.SetNoDataValue(0)
     out_band1.FlushCache()
     out_band1.GetStatistics(0, 1)
 
+    # set the geotransform and projection
     dem_dataset.SetGeoTransform(database_out_png_dataset.GetGeoTransform())
     dem_dataset.SetProjection(database_out_png_dataset.GetProjection())
 
+    # unlink the in memory dataset and set open variables to None
     gdal.Unlink(in_memory_img_path)
     database_out_png_dataset = None
     dem_dataset = None
@@ -188,6 +197,7 @@ def getDem():
                 -co "TILED=YES" \
                 {0} {1}'.format(dem_tif_path, dem_tif_resample_path)
 
+    # run warp/resampling process
     warp_process = Popen(warp_process_args, shell=True)
     warp_process.wait()
 
@@ -197,13 +207,12 @@ def getDem():
 
     color_gradient_process = Popen(color_gradient_process_args, shell=True)
 
+    # make the hillshade
     hillshade_process_args = 'gdaldem hillshade {0} {1} -of PNG -z 2'.format(dem_tif_resample_path, hillshade_png_path)
 
     hillshade_process = Popen(hillshade_process_args, shell=True)
 
     hillshade_process.wait()
-
-    # make_transparent_hillshade(hillshade_png_path, hillshade_transparent_png_path)
 
     # Be sure the color gradient process has finished
     color_gradient_process.wait()
@@ -222,12 +231,11 @@ def getDem():
                      "transparent_hillshade_base64": "{1}"'.format(color_gradient_base64, transparent_hillshade_base64)
         return '{' + response_string + '}'
 
+    # if the format is zip, return the zip file
     elif out_format == 'zip':
         zip_file_out = temp_folder
         shutil.make_archive(zip_file_out, format="zip", root_dir=temp_folder)
         zip_file_out += '.zip'
-
-        # return send_from_directory(zip_file_out, "demDownload.zip")
         return send_file(zip_file_out, mimetype='application/zip', as_attachment='demDownload.zip')
 
     else:
