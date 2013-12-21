@@ -11,6 +11,7 @@ OPENID_PROVIDERS = [
     {'name': 'MyOpenID', 'url': 'https://www.myopenid.com'}]
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+tempZipDir = os.path.join(basedir, 'tmp/tempzip')
 
 #dialect+driver://username:password@host:port/database
 ######## LocalHost ########
