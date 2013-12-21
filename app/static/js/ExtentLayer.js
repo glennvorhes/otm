@@ -346,7 +346,7 @@ ExtentLayer.prototype.updateDEM = function(){
                 'Elevation Model', 'data:image/png;base64,' + responseJSON['color_gradient_base64'], demBounds, new OpenLayers.Size(1, 1) ,{isBaseLayer:false});
 
             thisObj.demHillshade = new OpenLayers.Layer.Image(
-                'Elevation Hillshade', 'data:image/png;base64,' + responseJSON['transparent_hillshade_base64'], demBounds, new OpenLayers.Size(1, 1) ,{isBaseLayer:false});
+                'Elevation Hillshade', 'data:image/png;base64,' + responseJSON['hillshade_base64'], demBounds, new OpenLayers.Size(1, 1) ,{isBaseLayer:false});
 
             var demOpacity = parseFloat(dijit.byId(thisObj.opacitySlider).value) / 100;
             thisObj.demGradient.setOpacity(demOpacity);

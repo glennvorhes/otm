@@ -95,7 +95,7 @@ def addfeature():
     # geomValid =  db_session.scalar(func.is_valid(newGeom))
     if not (geomValid):
         db_session.close()
-        return jsonify(fid=-1,valid=False)
+        return jsonify(fid=-1, valid=False)
 
     proj = db_session.query(models.Project).get(session['currentProject']['pid'])
 
