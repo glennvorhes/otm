@@ -1,6 +1,6 @@
 __author__ = 'glenn'
-from project import Project
+from project import ProjectProcessor
 
 
-class WaterProject(Project):
+class WaterProject(ProjectProcessor):
     pass
