@@ -53,13 +53,17 @@
         <th>Type</th>
     </tr>
 
-{% for tup in user_projects %}
+{% for proj_type in user_projects %}
     <tr>
-        <td><a href="{{'javascript:setProject(' ~ tup.Project.pid ~');'}}">Select</a></td>
-        <td>{{tup.Project.project_name}}</td>
-        <td>{{tup.Project.created}}</td>
-        <td>{{tup.Project.last_modified}}</td>
-        <td>{{tup.Project_Type.description}}</td>
+        <td><a href="{{'javascript:setProject(' ~ proj_type.Project.pid ~');'}}">Select</a></td>
+        <td>{{proj_type.Project.project_name}}</td>
+        <td>{{proj_type.Project.created.year ~ '-' ~
+                proj_type.Project.created.month ~ '-' ~
+                proj_type.Project.created.day }}</td>
+        <td>{{proj_type.Project.last_modified.year ~ '-' ~
+                proj_type.Project.last_modified.month ~ '-' ~
+                proj_type.Project.last_modified.day }}</td>
+        <td>{{proj_type.Project_Type.description}}</td>
     </tr>
 {% endfor %}
 

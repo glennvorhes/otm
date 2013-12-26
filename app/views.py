@@ -54,17 +54,20 @@ def getProjects():
             db_session.add(newproj)
             db_session.commit()
 
-    projects_type_tuple = db_session.query(models.Project, models.Project_Type).\
+    project_type_tuple = db_session.query(models.Project, models.Project_Type).\
         join(models.Project_Type).filter(models.Project.uid == int(g.user.uid))
+
     projectTypes = db_session.query(models.Project_Type).all()
+
     userProjectList = []
-    for p in projects_type_tuple:
+    for p in project_type_tuple:
         userProjectList.append(p.Project.pid)
+
     session['userProjectList'] = userProjectList
     db_session.close()
     return render_template('projects.html',
                            title='Projects',
-                           user_projects=projects_type_tuple,
+                           user_projects=project_type_tuple,
                            projectTypes=projectTypes,
                            form=projform)
 
