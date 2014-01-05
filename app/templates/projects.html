@@ -1,5 +1,54 @@
 {% extends "template.html" %}
 {% block head %}
+    <style type="text/css">
+{#        #projects_table > * {#}
+{#            background-color: #d3d3d3;#}
+{#        }#}
+
+    table{
+        border-collapse:collapse;
+        margin: 10px;
+        padding: 10px;
+        text-align: center;
+    }
+
+    tr:first-child th{
+        border: solid black 2px;
+        background-color: #dcdcdc;
+    }
+
+{#    tr:first-child th:first-child{#}
+{#        border-left:none;#}
+{#        border-top:none;#}
+{#    }#}
+
+    th, td {
+        padding: 5px 20px;
+    }
+
+
+
+    td {
+        border: 1px solid black;
+    }
+
+    tr:nth-of-type(odd) td
+    {
+        background:lightskyblue;
+    }
+
+
+    tr:first-child:after tr:hover
+    {
+        background-color:yellow;
+    }
+
+
+
+
+    </style>
+
+
     <script>
         function setProject(pid){
             $.ajax({
@@ -20,6 +69,10 @@
                 }
             });
         }
+
+
+        jQuery('tr').hover(function(){console.log(this)}, function(){console.log(this);});
+
     </script>
 {% endblock head%}
 {% block content %}
@@ -43,11 +96,11 @@
         <p>
         <input type="submit" value="Create Project"></p>
     </form>
+<div style="padding: 10px; width: 100%">
 <table id='projects_table'>
     <tr>
-        <th>Sel</th>
+        <th></th>
         <th>Project Name</th>
-
         <th>Created</th>
         <th>Modified</th>
         <th>Type</th>
@@ -68,4 +121,5 @@
 {% endfor %}
 
 </table>
+</div>
 {% endblock content%}
