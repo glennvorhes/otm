@@ -54,15 +54,15 @@ def getDem():
 
     # default case, return the png image to the client
     if out_format == 'imagepng':
-        color_gradient_png_path = gdal_ops.get_property(GDAL_OPERATIONS_PROPS.COLOR_GRADIENT)
+        color_gradient_png_path = gdal_ops.get_file_path(GDAL_OPERATIONS_PROPS.COLOR_GRADIENT)
         return send_file(color_gradient_png_path, mimetype='image/png')
 
     # if out_format is base64png, return the base64 representation of the raster
     elif out_format == 'base64png':
-        color_gradient_png_path = gdal_ops.get_property(GDAL_OPERATIONS_PROPS.COLOR_GRADIENT)
+        color_gradient_png_path = gdal_ops.get_file_path(GDAL_OPERATIONS_PROPS.COLOR_GRADIENT)
         with open(color_gradient_png_path, 'rb') as img:
             color_gradient_base64 = base64.b64encode(img.read())
-        hillshade_png_path = gdal_ops.get_property(GDAL_OPERATIONS_PROPS.HILLSHADE)
+        hillshade_png_path = gdal_ops.get_file_path(GDAL_OPERATIONS_PROPS.HILLSHADE)
         with open(hillshade_png_path, 'rb') as img:
             hillshade_base64 = base64.b64encode(img.read())
         response_string = '"color_gradient_base64": "{0}",\
@@ -76,7 +76,7 @@ def getDem():
         gdal_ops.make_color_gradient()
         gdal_ops.make_slope()
         gdal_ops.make_aspect()
-        zip_file_out = gdal_ops.get_property(GDAL_OPERATIONS_PROPS.ZIP_FILE)
+        zip_file_out = gdal_ops.get_file_path(GDAL_OPERATIONS_PROPS.ZIP_FILE)
         return send_file(zip_file_out, mimetype='application/zip', as_attachment='demDownload.zip')
 
     else:
