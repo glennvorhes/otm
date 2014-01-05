@@ -4,7 +4,8 @@ from app import app, models, DatabaseSessionMaker
 from geoalchemy2.elements import WKTElement
 from datetime import datetime
 import simplejson
-from sqlalchemy import func
+# from sqlalchemy import func
+from geoalchemy2 import functions as geoalchemy_func
 
 
 @app.route('/map/getfeatures')
@@ -24,7 +25,7 @@ def getfeatures():
     for f in feats:
         hasFeats = True
         jsonstring += '\t\t{\n\t\t"type": "Feature"'
-        jsonstring += ',\n\t\t"geometry": ' + db_session.scalar(func.ST_AsGeoJSON(f.geom))
+        jsonstring += ',\n\t\t"geometry": ' + db_session.scalar(geoalchemy_func.ST_AsGeoJSON(f.geom))
         jsonstring += ',\n' + f.getGeoJSONProps()
         jsonstring += '\n\t\t},\n'
     if hasFeats:
@@ -65,7 +66,7 @@ def showmap():
     if thisproj.geom is None:
         props['geom'] = None
     else:
-        props['geom'] = db_session.scalar(func.ST_AsGeoJSON(thisproj.geom))
+        props['geom'] = db_session.scalar(geoalchemy_func.ST_AsGeoJSON(thisproj.geom))
         print props['geom']
 
     session['currentProject'] = props
@@ -90,12 +91,12 @@ def addfeature():
 
     newGeom = WKTElement(geomWKT, srid=srid)
     # Check the geometry before proceeding
-    # geomSimple =  db_session.scalar(func.is_simple(newGeom))ST_IsValid
-    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
-    # geomValid =  db_session.scalar(func.is_valid(newGeom))
-    if not (geomValid):
+    geomValid = db_session.scalar(geoalchemy_func.ST_IsValid(newGeom))
+    if not geomValid:
         db_session.close()
         return jsonify(fid=-1, valid=False)
+
+
 
     proj = db_session.query(models.Project).get(session['currentProject']['pid'])
 
@@ -146,9 +147,9 @@ def editfeaturegeom():
 
     newGeom = WKTElement(geomWKT, srid=srid)
     # Check the geometry before proceeding
-    geomValid = db_session.scalar(func.ST_IsValid(newGeom))
-    # geomSimple = db_session.scalar(func.is_simple(newGeom))
-    # geomValid = db_session.scalar(func.is_valid(newGeom))
+    geomValid = db_session.scalar(geoalchemy_func.ST_IsValid(newGeom))
+    # geomSimple = db_session.scalar(geoalchemy_func.is_simple(newGeom))
+    # geomValid = db_session.scalar(geoalchemy_func.is_valid(newGeom))
     if not geomValid:
         return jsonify(fid=-1)
     updateFeature = db_session.query(models.Feature).get(featFID)
@@ -172,9 +173,9 @@ def updateextent():
 
         newGeom = WKTElement(geomWKT, srid=srid)
         # Check the geometry before proceeding
-        # geomSimple =  db_session.scalar(func.is_simple(newGeom))
-        # geomValid =  db_session.scalar(func.is_valid(newGeom))
-        geomValid = db_session.scalar(func.ST_IsValid(newGeom))
+        # geomSimple =  db_session.scalar(geoalchemy_func.is_simple(newGeom))
+        # geomValid =  db_session.scalar(geoalchemy_func.is_valid(newGeom))
+        geomValid = db_session.scalar(geoalchemy_func.ST_IsValid(newGeom))
 
         if not geomValid:
             return jsonify(code=-1)
@@ -183,7 +184,7 @@ def updateextent():
 
         proj.geom = newGeom
         db_session.commit()
-        # extentGeojson = db_session.scalar(func.ST_AsGeoJSON(newGeom))
+        # extentGeojson = db_session.scalar(geoalchemy_func.ST_AsGeoJSON(newGeom))
         return jsonify(code=1)
 
     elif updateTask == 3:
