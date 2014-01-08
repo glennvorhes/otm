@@ -138,7 +138,7 @@ class Project(Base):
     __tablename__ = 'project'
     pid = Column(Integer, primary_key=True)
     uid = Column(Integer, ForeignKey('user.uid'))
-    tid = Column(Integer,ForeignKey('project_type.tid'))
+    tid = Column(Integer, ForeignKey('project_type.tid'))
     project_name = Column(String(50))
     created = Column(DateTime, default=datetime.now())
     last_modified = Column(DateTime, default=datetime.now())
