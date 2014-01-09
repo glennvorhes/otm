@@ -223,6 +223,16 @@ class GdalOperations(object):
             '0% magenta',
             'nv 0 0 0 0']
 
+        color_ramp = [
+            '100% white',
+            '83% grey',
+            '67% brown',
+            '50% orange',
+            '33% green',
+            '17% yellow',
+            '0% aqua',
+            'nv 0 0 0 0']
+
         with open(self.__color_gradient_txt_path, 'w') as f:
                 f.write(string.join(color_ramp, '\n'))
 
