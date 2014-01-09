@@ -112,25 +112,32 @@ def exampleEditFeatures():
 
 @app.route('/example/updateextent', methods=['POST'])
 def exampleUpdateExtent():
-
+    print 'Heerrrererer'
     # Task ids add: 1, modify:2, clear:3
     update_task = int(request.form["updatetask"])
     if update_task == 1 or update_task == 2:
-        db_session = DatabaseSessionMaker()
+
         geom_wkt = str(request.form["geomWKT"])
         srid_raw = str(request.form["srid"])
         # Just need the SRID number
         srid = long(srid_raw[srid_raw.find(':')+1:])
 
-        new_geom = WKTElement(geom_wkt, srid=srid)
-        # Check the geometry before proceeding
-        # geomSimple =  db_session.scalar(func.is_simple(newGeom))
-        # geomValid =  db_session.scalar(func.is_valid(newGeom))
-        geom_valid = db_session.scalar(func.ST_IsValid(new_geom))
-        db_session.close()
-        if not geom_valid:
+        geom_check = geom_wkt
+        geom_check.replace('POLYGON((', '').replace('))', '')
+
+        if len(geom_check.split(',')) > 3:
+            db_session = DatabaseSessionMaker()
+            new_geom = WKTElement(geom_wkt, srid=srid)
+            # Check the geometry before proceeding
+            geom_valid = db_session.scalar(func.ST_IsValid(new_geom))
+            db_session.close()
+        else:
+            geom_valid = False
+
+        if geom_valid:
+            return jsonify(code=1)
+        else:
             return jsonify(code=-1)
-        return jsonify(code=1)
 
     elif update_task == 3:
         return jsonify(code=1)

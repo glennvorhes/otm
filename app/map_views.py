@@ -171,13 +171,19 @@ def updateextent():
         # Just need the SRID number
         srid = long(srid_raw[srid_raw.find(':')+1:])
 
-        newGeom = WKTElement(geomWKT, srid=srid)
-        # Check the geometry before proceeding
-        # geomSimple =  db_session.scalar(geoalchemy_func.is_simple(newGeom))
-        # geomValid =  db_session.scalar(geoalchemy_func.is_valid(newGeom))
-        geomValid = db_session.scalar(geoalchemy_func.ST_IsValid(newGeom))
+        geom_check = geomWKT
+        geom_check.replace('POLYGON((', '').replace('))', '')
+
+        if len(geom_check.split(',')) > 3:
+            db_session = DatabaseSessionMaker()
+            newGeom = WKTElement(geomWKT, srid=srid)
+            # Check the geometry before proceeding
+            geomValid = db_session.scalar(geoalchemy_func.ST_IsValid(newGeom))
+        else:
+            geomValid = False
 
         if not geomValid:
+            db_session.close()
             return jsonify(code=-1)
 
         proj = db_session.query(models.Project).get(session['currentProject']['pid'])

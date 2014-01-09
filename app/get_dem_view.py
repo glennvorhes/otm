@@ -26,6 +26,7 @@ def delete_temp_files(the_directory):
 @app.route('/getdem')
 def getDem():
     # delete old stuff
+    print "Starting !!!!!!!!!!!!!!!!111"
     thread.start_new_thread(delete_temp_files, (tempZipDir,))
 
     has_error = False
@@ -38,11 +39,9 @@ def getDem():
         return render_template('getDem.html', title='Get Data')
 
     geom_check = geom_wkt
-    assert(isinstance(geom_check, str))
-
     geom_check.replace('POLYGON((', '').replace('))', '')
 
-    if len(geom_check.split(',')) < 3:
+    if len(geom_check.split(',')) < 4:
         has_error = True
 
     try:
