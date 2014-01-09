@@ -37,6 +37,14 @@ def getDem():
     if geom_wkt == '':
         return render_template('getDem.html', title='Get Data')
 
+    geom_check = geom_wkt
+    assert(isinstance(geom_check, str))
+
+    geom_check.replace('POLYGON((', '').replace('))', '')
+
+    if len(geom_check.split(',')) < 3:
+        has_error = True
+
     try:
         out_srid = long(out_srid)
         in_srid = long(in_srid)
