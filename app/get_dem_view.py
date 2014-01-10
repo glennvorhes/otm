@@ -26,7 +26,6 @@ def delete_temp_files(the_directory):
 @app.route('/getdem')
 def getDem():
     # delete old stuff
-    print "Starting !!!!!!!!!!!!!!!!111"
     thread.start_new_thread(delete_temp_files, (tempZipDir,))
 
     has_error = False
