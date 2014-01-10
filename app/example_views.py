@@ -112,7 +112,6 @@ def exampleEditFeatures():
 
 @app.route('/example/updateextent', methods=['POST'])
 def exampleUpdateExtent():
-    print 'Heerrrererer'
     # Task ids add: 1, modify:2, clear:3
     update_task = int(request.form["updatetask"])
     if update_task == 1 or update_task == 2:
